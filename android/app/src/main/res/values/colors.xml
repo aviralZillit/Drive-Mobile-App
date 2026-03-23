@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="zillit_accent">#F99300</color>
+    <color name="zillit_primary">#1353D1</color>
+    <color name="zillit_text">#12213F</color>
+    <color name="zillit_muted">#5F6D88</color>
+    <color name="zillit_light_gray">#F5F6FA</color>
+    <color name="zillit_text_muted">#8F9BB3</color>
+    <color name="zillit_border">#E8EBF0</color>
+    <color name="zillit_danger">#E53935</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+</resources>

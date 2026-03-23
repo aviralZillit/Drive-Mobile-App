@@ -1,0 +1,29 @@
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+*.iml
+*.hprof
+
+# iOS
+ios/build/
+ios/Pods/
+ios/*.xcworkspace
+ios/DerivedData/
+ios/.build/
+
+# Environment
+.env
+.env.*
+*.keystore
+*.jks
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

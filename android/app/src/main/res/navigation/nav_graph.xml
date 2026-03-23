@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/loginFragment">
+
+    <!-- Auth -->
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.zillit.drive.presentation.auth.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_login_to_home"
+            app:destination="@id/homeFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- Files Tab -->
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.zillit.drive.presentation.home.HomeFragment"
+        android:label="Files"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_home_to_folder"
+            app:destination="@id/folderFragment" />
+        <action
+            android:id="@+id/action_home_to_file_detail"
+            app:destination="@id/fileDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/folderFragment"
+        android:name="com.zillit.drive.presentation.folder.FolderFragment"
+        android:label="Folder"
+        tools:layout="@layout/fragment_folder">
+        <argument
+            android:name="folderId"
+            app:argType="string" />
+        <argument
+            android:name="folderName"
+            app:argType="string"
+            android:defaultValue="Folder" />
+        <action
+            android:id="@+id/action_folder_to_folder"
+            app:destination="@id/folderFragment" />
+        <action
+            android:id="@+id/action_folder_to_file_detail"
+            app:destination="@id/fileDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fileDetailFragment"
+        android:name="com.zillit.drive.presentation.file.FileDetailFragment"
+        android:label="File Details"
+        tools:layout="@layout/fragment_file_detail">
+        <argument
+            android:name="fileId"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_file_detail_to_share"
+            app:destination="@id/shareFragment" />
+    </fragment>
+
+    <!-- Search Tab -->
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.zillit.drive.presentation.search.SearchFragment"
+        android:label="Search"
+        tools:layout="@layout/fragment_search">
+        <action
+            android:id="@+id/action_search_to_file_detail"
+            app:destination="@id/fileDetailFragment" />
+    </fragment>
+
+    <!-- Uploads Tab -->
+    <fragment
+        android:id="@+id/uploadFragment"
+        android:name="com.zillit.drive.presentation.upload.UploadFragment"
+        android:label="Uploads"
+        tools:layout="@layout/fragment_upload" />
+
+    <!-- Favorites Tab -->
+    <fragment
+        android:id="@+id/favoritesFragment"
+        android:name="com.zillit.drive.presentation.favorites.FavoritesFragment"
+        android:label="Favorites"
+        tools:layout="@layout/fragment_favorites">
+        <action
+            android:id="@+id/action_favorites_to_file_detail"
+            app:destination="@id/fileDetailFragment" />
+        <action
+            android:id="@+id/action_favorites_to_folder"
+            app:destination="@id/folderFragment" />
+    </fragment>
+
+    <!-- More Tab -->
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.zillit.drive.presentation.settings.SettingsFragment"
+        android:label="More"
+        tools:layout="@layout/fragment_settings">
+        <action
+            android:id="@+id/action_settings_to_trash"
+            app:destination="@id/trashFragment" />
+        <action
+            android:id="@+id/action_settings_to_activity"
+            app:destination="@id/activityFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/trashFragment"
+        android:name="com.zillit.drive.presentation.trash.TrashFragment"
+        android:label="Trash"
+        tools:layout="@layout/fragment_trash" />
+
+    <fragment
+        android:id="@+id/activityFragment"
+        android:name="com.zillit.drive.presentation.activity.ActivityFragment"
+        android:label="Activity"
+        tools:layout="@layout/fragment_activity" />
+
+    <!-- Share screen (accessible from any file/folder) -->
+    <fragment
+        android:id="@+id/shareFragment"
+        android:name="com.zillit.drive.presentation.share.ShareFragment"
+        android:label="Share">
+        <argument
+            android:name="itemId"
+            app:argType="string" />
+        <argument
+            android:name="itemType"
+            app:argType="string" />
+    </fragment>
+
+</navigation>

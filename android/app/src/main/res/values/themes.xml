@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.ZillitDrive" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">#F99300</item>
+        <item name="colorPrimaryDark">#E07E00</item>
+        <item name="colorAccent">#1353D1</item>
+        <item name="android:statusBarColor">#FFFFFF</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="bottomNavigationStyle">@style/ZillitBottomNav</item>
+    </style>
+
+    <style name="ZillitBottomNav" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="itemIconTint">@color/bottom_nav_color</item>
+        <item name="itemTextColor">@color/bottom_nav_color</item>
+        <item name="android:background">@android:color/white</item>
+    </style>
+</resources>

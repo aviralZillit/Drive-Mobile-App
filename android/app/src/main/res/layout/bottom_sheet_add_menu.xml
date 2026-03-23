@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/menuUploadFile"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:text="Upload File"
+        android:textSize="16sp"
+        android:drawableStart="@android:drawable/ic_menu_upload"
+        android:drawablePadding="16dp"
+        android:background="?attr/selectableItemBackground" />
+
+    <TextView
+        android:id="@+id/menuTakePhoto"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:text="Take Photo"
+        android:textSize="16sp"
+        android:drawableStart="@android:drawable/ic_menu_camera"
+        android:drawablePadding="16dp"
+        android:background="?attr/selectableItemBackground" />
+
+    <TextView
+        android:id="@+id/menuCreateFolder"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:text="Create Folder"
+        android:textSize="16sp"
+        android:drawableStart="@android:drawable/ic_menu_add"
+        android:drawablePadding="16dp"
+        android:background="?attr/selectableItemBackground" />
+
+</LinearLayout>

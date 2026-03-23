@@ -1,0 +1,856 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10001AA /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001AB /* AppConfig.swift */; };
+		A10002AA /* ZillitDriveApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10002AB /* ZillitDriveApp.swift */; };
+		A10003AA /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10003AB /* SessionManager.swift */; };
+		A10004AA /* DriveMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10004AB /* DriveMapper.swift */; };
+		A10005AA /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10005AB /* APIClient.swift */; };
+		A10006AA /* DriveResponses.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10006AB /* DriveResponses.swift */; };
+		A10007AA /* DriveEndpoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10007AB /* DriveEndpoints.swift */; };
+		A10008AA /* DriveRepositoryImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10008AB /* DriveRepositoryImpl.swift */; };
+		A10009AA /* DriveModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10009AB /* DriveModels.swift */; };
+		A10010AA /* DriveRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10010AB /* DriveRepository.swift */; };
+		A10011AA /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10011AB /* LoginView.swift */; };
+		A10012AA /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10012AB /* LoginViewModel.swift */; };
+		A10013AA /* BreadcrumbView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10013AB /* BreadcrumbView.swift */; };
+		A10014AA /* DriveItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10014AB /* DriveItemRow.swift */; };
+		A10015AA /* FavoritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10015AB /* FavoritesView.swift */; };
+		A10016AA /* FileDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10016AB /* FileDetailView.swift */; };
+		A10017AA /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10017AB /* HomeView.swift */; };
+		A10018AA /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10018AB /* HomeViewModel.swift */; };
+		A10019AA /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10019AB /* SearchView.swift */; };
+		A10020AA /* MoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10020AB /* MoreView.swift */; };
+		A10021AA /* ShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10021AB /* ShareView.swift */; };
+		A10022AA /* TrashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10022AB /* TrashView.swift */; };
+		A10023AA /* UploadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10023AB /* UploadView.swift */; };
+		A10024AA /* AESCBCEncryptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10024AB /* AESCBCEncryptor.swift */; };
+		A10025AA /* BodyHashGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10025AB /* BodyHashGenerator.swift */; };
+		A10026AA /* FileUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10026AB /* FileUtils.swift */; };
+		A10027AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A10027AB /* Assets.xcassets */; };
+		A10028AA /* AESCBCEncryptorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10028AB /* AESCBCEncryptorTests.swift */; };
+		A10029AA /* BodyHashGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10029AB /* BodyHashGeneratorTests.swift */; };
+		A10030AA /* DriveMapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10030AB /* DriveMapperTests.swift */; };
+		A10031AA /* HomeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10031AB /* HomeViewModelTests.swift */; };
+		A10032AA /* MockDriveRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10032AB /* MockDriveRepository.swift */; };
+		A10033AA /* FileDetailTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10033AB /* FileDetailTests.swift */; };
+		A10034AA /* DriveRepositoryImplTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10034AB /* DriveRepositoryImplTests.swift */; };
+		A10035AA /* FileUtilsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10035AB /* FileUtilsTests.swift */; };
+		A10036AA /* SortOptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10036AB /* SortOptionTests.swift */; };
+		A10037AA /* ShareViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10037AB /* ShareViewTests.swift */; };
+		A10038AA /* SessionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10038AB /* SessionManagerTests.swift */; };
+		A10039AA /* OnlyOfficeEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10039AB /* OnlyOfficeEditorView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A20001AA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A30001AA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A40001AA;
+			remoteInfo = ZillitDrive;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		A10001AB /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
+		A10002AB /* ZillitDriveApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZillitDriveApp.swift; sourceTree = "<group>"; };
+		A10003AB /* SessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
+		A10004AB /* DriveMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveMapper.swift; sourceTree = "<group>"; };
+		A10005AB /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		A10006AB /* DriveResponses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveResponses.swift; sourceTree = "<group>"; };
+		A10007AB /* DriveEndpoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveEndpoints.swift; sourceTree = "<group>"; };
+		A10008AB /* DriveRepositoryImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveRepositoryImpl.swift; sourceTree = "<group>"; };
+		A10009AB /* DriveModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveModels.swift; sourceTree = "<group>"; };
+		A10010AB /* DriveRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveRepository.swift; sourceTree = "<group>"; };
+		A10011AB /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		A10012AB /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
+		A10013AB /* BreadcrumbView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreadcrumbView.swift; sourceTree = "<group>"; };
+		A10014AB /* DriveItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveItemRow.swift; sourceTree = "<group>"; };
+		A10015AB /* FavoritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesView.swift; sourceTree = "<group>"; };
+		A10016AB /* FileDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDetailView.swift; sourceTree = "<group>"; };
+		A10039AB /* OnlyOfficeEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnlyOfficeEditorView.swift; sourceTree = "<group>"; };
+		A10017AB /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		A10018AB /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
+		A10019AB /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
+		A10020AB /* MoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreView.swift; sourceTree = "<group>"; };
+		A10021AB /* ShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareView.swift; sourceTree = "<group>"; };
+		A10022AB /* TrashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrashView.swift; sourceTree = "<group>"; };
+		A10023AB /* UploadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadView.swift; sourceTree = "<group>"; };
+		A10024AB /* AESCBCEncryptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AESCBCEncryptor.swift; sourceTree = "<group>"; };
+		A10025AB /* BodyHashGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyHashGenerator.swift; sourceTree = "<group>"; };
+		A10026AB /* FileUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileUtils.swift; sourceTree = "<group>"; };
+		A10027AB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A10028AB /* AESCBCEncryptorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AESCBCEncryptorTests.swift; sourceTree = "<group>"; };
+		A10029AB /* BodyHashGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyHashGeneratorTests.swift; sourceTree = "<group>"; };
+		A10030AB /* DriveMapperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveMapperTests.swift; sourceTree = "<group>"; };
+		A10031AB /* HomeViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModelTests.swift; sourceTree = "<group>"; };
+		A10032AB /* MockDriveRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDriveRepository.swift; sourceTree = "<group>"; };
+		A10033AB /* FileDetailTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDetailTests.swift; sourceTree = "<group>"; };
+		A10034AB /* DriveRepositoryImplTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveRepositoryImplTests.swift; sourceTree = "<group>"; };
+		A10035AB /* FileUtilsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileUtilsTests.swift; sourceTree = "<group>"; };
+		A10036AB /* SortOptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortOptionTests.swift; sourceTree = "<group>"; };
+		A10037AB /* ShareViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewTests.swift; sourceTree = "<group>"; };
+		A10038AB /* SessionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManagerTests.swift; sourceTree = "<group>"; };
+		A40001AB /* ZillitDrive.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZillitDrive.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A40002AB /* ZillitDriveTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZillitDriveTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A50001AA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A50002AA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A60001AA /* Root */ = {
+			isa = PBXGroup;
+			children = (
+				A60002AA /* ZillitDrive */,
+				A60020AA /* ZillitDriveTests */,
+				A60099AA /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A60099AA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A40001AB /* ZillitDrive.app */,
+				A40002AB /* ZillitDriveTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A60002AA /* ZillitDrive */ = {
+			isa = PBXGroup;
+			children = (
+				A60003AA /* App */,
+				A60004AA /* Data */,
+				A60009AA /* Domain */,
+				A60011AA /* Presentation */,
+				A60018AA /* Utilities */,
+				A60019AA /* Resources */,
+			);
+			path = ZillitDrive;
+			sourceTree = "<group>";
+		};
+		A60003AA /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A10001AB /* AppConfig.swift */,
+				A10002AB /* ZillitDriveApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		A60004AA /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				A60005AA /* Local */,
+				A60006AA /* Mapper */,
+				A60007AA /* Remote */,
+				A60008AA /* Repository */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		A60005AA /* Local */ = {
+			isa = PBXGroup;
+			children = (
+				A10003AB /* SessionManager.swift */,
+			);
+			path = Local;
+			sourceTree = "<group>";
+		};
+		A60006AA /* Mapper */ = {
+			isa = PBXGroup;
+			children = (
+				A10004AB /* DriveMapper.swift */,
+			);
+			path = Mapper;
+			sourceTree = "<group>";
+		};
+		A60007AA /* Remote */ = {
+			isa = PBXGroup;
+			children = (
+				A10005AB /* APIClient.swift */,
+				A60007BA /* DTOs */,
+				A60007CA /* Endpoints */,
+			);
+			path = Remote;
+			sourceTree = "<group>";
+		};
+		A60007BA /* DTOs */ = {
+			isa = PBXGroup;
+			children = (
+				A10006AB /* DriveResponses.swift */,
+			);
+			path = DTOs;
+			sourceTree = "<group>";
+		};
+		A60007CA /* Endpoints */ = {
+			isa = PBXGroup;
+			children = (
+				A10007AB /* DriveEndpoints.swift */,
+			);
+			path = Endpoints;
+			sourceTree = "<group>";
+		};
+		A60008AA /* Repository */ = {
+			isa = PBXGroup;
+			children = (
+				A10008AB /* DriveRepositoryImpl.swift */,
+			);
+			path = Repository;
+			sourceTree = "<group>";
+		};
+		A60009AA /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				A60010AA /* Models */,
+				A60010BA /* RepositoryProtocols */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		A60010AA /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A10009AB /* DriveModels.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		A60010BA /* RepositoryProtocols */ = {
+			isa = PBXGroup;
+			children = (
+				A10010AB /* DriveRepository.swift */,
+			);
+			path = RepositoryProtocols;
+			sourceTree = "<group>";
+		};
+		A60011AA /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				A60012AA /* Auth */,
+				A60013AA /* Components */,
+				A60014AA /* Favorites */,
+				A60014BA /* File */,
+				A60015AA /* Home */,
+				A60016AA /* Search */,
+				A60016BA /* Settings */,
+				A60016CA /* Share */,
+				A60017AA /* Trash */,
+				A60017BA /* Upload */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		A60012AA /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				A10011AB /* LoginView.swift */,
+				A10012AB /* LoginViewModel.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		A60013AA /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				A10013AB /* BreadcrumbView.swift */,
+				A10014AB /* DriveItemRow.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		A60014AA /* Favorites */ = {
+			isa = PBXGroup;
+			children = (
+				A10015AB /* FavoritesView.swift */,
+			);
+			path = Favorites;
+			sourceTree = "<group>";
+		};
+		A60014BA /* File */ = {
+			isa = PBXGroup;
+			children = (
+				A10016AB /* FileDetailView.swift */,
+				A10039AB /* OnlyOfficeEditorView.swift */,
+			);
+			path = File;
+			sourceTree = "<group>";
+		};
+		A60015AA /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				A10017AB /* HomeView.swift */,
+				A10018AB /* HomeViewModel.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		A60016AA /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				A10019AB /* SearchView.swift */,
+			);
+			path = Search;
+			sourceTree = "<group>";
+		};
+		A60016BA /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				A10020AB /* MoreView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		A60016CA /* Share */ = {
+			isa = PBXGroup;
+			children = (
+				A10021AB /* ShareView.swift */,
+			);
+			path = Share;
+			sourceTree = "<group>";
+		};
+		A60017AA /* Trash */ = {
+			isa = PBXGroup;
+			children = (
+				A10022AB /* TrashView.swift */,
+			);
+			path = Trash;
+			sourceTree = "<group>";
+		};
+		A60017BA /* Upload */ = {
+			isa = PBXGroup;
+			children = (
+				A10023AB /* UploadView.swift */,
+			);
+			path = Upload;
+			sourceTree = "<group>";
+		};
+		A60018AA /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				A60018BA /* Crypto */,
+				A10026AB /* FileUtils.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		A60018BA /* Crypto */ = {
+			isa = PBXGroup;
+			children = (
+				A10024AB /* AESCBCEncryptor.swift */,
+				A10025AB /* BodyHashGenerator.swift */,
+			);
+			path = Crypto;
+			sourceTree = "<group>";
+		};
+		A60019AA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A10027AB /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		A60020AA /* ZillitDriveTests */ = {
+			isa = PBXGroup;
+			children = (
+				A10028AB /* AESCBCEncryptorTests.swift */,
+				A10029AB /* BodyHashGeneratorTests.swift */,
+				A10030AB /* DriveMapperTests.swift */,
+				A10031AB /* HomeViewModelTests.swift */,
+				A10033AB /* FileDetailTests.swift */,
+				A10034AB /* DriveRepositoryImplTests.swift */,
+				A10035AB /* FileUtilsTests.swift */,
+				A10036AB /* SortOptionTests.swift */,
+				A10037AB /* ShareViewTests.swift */,
+				A10038AB /* SessionManagerTests.swift */,
+				A60021AA /* Mocks */,
+			);
+			path = ZillitDriveTests;
+			sourceTree = "<group>";
+		};
+		A60021AA /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				A10032AB /* MockDriveRepository.swift */,
+			);
+			path = Mocks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A40001AA /* ZillitDrive */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A80001AA /* Build configuration list for PBXNativeTarget "ZillitDrive" */;
+			buildPhases = (
+				A70001AA /* Sources */,
+				A50001AA /* Frameworks */,
+				A70002AA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ZillitDrive;
+			packageProductDependencies = (
+				A90001AA /* Kingfisher */,
+				A90002AA /* SocketIO */,
+			);
+			productName = ZillitDrive;
+			productReference = A40001AB /* ZillitDrive.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A40002AA /* ZillitDriveTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A80002AA /* Build configuration list for PBXNativeTarget "ZillitDriveTests" */;
+			buildPhases = (
+				A70003AA /* Sources */,
+				A50002AA /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A20002AA /* PBXTargetDependency */,
+			);
+			name = ZillitDriveTests;
+			productName = ZillitDriveTests;
+			productReference = A40002AB /* ZillitDriveTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A30001AA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1520;
+				LastUpgradeCheck = 1520;
+				TargetAttributes = {
+					A40001AA = {
+						CreatedOnToolsVersion = 15.2;
+					};
+					A40002AA = {
+						CreatedOnToolsVersion = 15.2;
+						TestTargetID = A40001AA;
+					};
+				};
+			};
+			buildConfigurationList = A80003AA /* Build configuration list for PBXProject "ZillitDrive" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A60001AA /* Root */;
+			packageReferences = (
+				A90003AA /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				A90004AA /* XCRemoteSwiftPackageReference "socket.io-client-swift" */,
+			);
+			productRefGroup = A60099AA /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A40001AA /* ZillitDrive */,
+				A40002AA /* ZillitDriveTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A70002AA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10027AA /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A70001AA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10001AA /* AppConfig.swift in Sources */,
+				A10002AA /* ZillitDriveApp.swift in Sources */,
+				A10003AA /* SessionManager.swift in Sources */,
+				A10004AA /* DriveMapper.swift in Sources */,
+				A10005AA /* APIClient.swift in Sources */,
+				A10006AA /* DriveResponses.swift in Sources */,
+				A10007AA /* DriveEndpoints.swift in Sources */,
+				A10008AA /* DriveRepositoryImpl.swift in Sources */,
+				A10009AA /* DriveModels.swift in Sources */,
+				A10010AA /* DriveRepository.swift in Sources */,
+				A10011AA /* LoginView.swift in Sources */,
+				A10012AA /* LoginViewModel.swift in Sources */,
+				A10013AA /* BreadcrumbView.swift in Sources */,
+				A10014AA /* DriveItemRow.swift in Sources */,
+				A10015AA /* FavoritesView.swift in Sources */,
+				A10016AA /* FileDetailView.swift in Sources */,
+				A10017AA /* HomeView.swift in Sources */,
+				A10018AA /* HomeViewModel.swift in Sources */,
+				A10019AA /* SearchView.swift in Sources */,
+				A10020AA /* MoreView.swift in Sources */,
+				A10021AA /* ShareView.swift in Sources */,
+				A10022AA /* TrashView.swift in Sources */,
+				A10023AA /* UploadView.swift in Sources */,
+				A10024AA /* AESCBCEncryptor.swift in Sources */,
+				A10025AA /* BodyHashGenerator.swift in Sources */,
+				A10026AA /* FileUtils.swift in Sources */,
+				A10039AA /* OnlyOfficeEditorView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A70003AA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10028AA /* AESCBCEncryptorTests.swift in Sources */,
+				A10029AA /* BodyHashGeneratorTests.swift in Sources */,
+				A10030AA /* DriveMapperTests.swift in Sources */,
+				A10031AA /* HomeViewModelTests.swift in Sources */,
+				A10032AA /* MockDriveRepository.swift in Sources */,
+				A10033AA /* FileDetailTests.swift in Sources */,
+				A10034AA /* DriveRepositoryImplTests.swift in Sources */,
+				A10035AA /* FileUtilsTests.swift in Sources */,
+				A10036AA /* SortOptionTests.swift in Sources */,
+				A10037AA /* ShareViewTests.swift in Sources */,
+				A10038AA /* SessionManagerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A20002AA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A40001AA /* ZillitDrive */;
+			targetProxy = A20001AA /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		B10001AA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		B10002AA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		B10003AA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					Security,
+					"-framework",
+					QuickLook,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.zillit.drive;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B10004AA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					Security,
+					"-framework",
+					QuickLook,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.zillit.drive;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B10005AA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.zillit.drive.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ZillitDrive.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ZillitDrive";
+			};
+			name = Debug;
+		};
+		B10006AA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.zillit.drive.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ZillitDrive.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ZillitDrive";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A80003AA /* Build configuration list for PBXProject "ZillitDrive" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B10001AA /* Debug */,
+				B10002AA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A80001AA /* Build configuration list for PBXNativeTarget "ZillitDrive" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B10003AA /* Debug */,
+				B10004AA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A80002AA /* Build configuration list for PBXNativeTarget "ZillitDriveTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B10005AA /* Debug */,
+				B10006AA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A90003AA /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = exactVersion;
+				version = 7.12.0;
+			};
+		};
+		A90004AA /* XCRemoteSwiftPackageReference "socket.io-client-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/socketio/socket.io-client-swift.git";
+			requirement = {
+				kind = exactVersion;
+				version = 16.1.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A90001AA /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A90003AA /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
+		A90002AA /* SocketIO */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A90004AA /* XCRemoteSwiftPackageReference "socket.io-client-swift" */;
+			productName = SocketIO;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = A30001AA /* Project object */;
+}

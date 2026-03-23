@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Sort by"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="#5F6D88"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp" />
+
+    <TextView
+        android:id="@+id/sortByName"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:text="Name"
+        android:textSize="16sp"
+        android:background="?attr/selectableItemBackground" />
+
+    <TextView
+        android:id="@+id/sortByDate"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:text="Date modified"
+        android:textSize="16sp"
+        android:background="?attr/selectableItemBackground" />
+
+    <TextView
+        android:id="@+id/sortBySize"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:text="Size"
+        android:textSize="16sp"
+        android:background="?attr/selectableItemBackground" />
+
+    <TextView
+        android:id="@+id/sortByType"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:text="Type"
+        android:textSize="16sp"
+        android:background="?attr/selectableItemBackground" />
+
+</LinearLayout>
