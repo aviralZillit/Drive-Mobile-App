@@ -33,6 +33,7 @@
 		A10024AA /* AESCBCEncryptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10024AB /* AESCBCEncryptor.swift */; };
 		A10025AA /* BodyHashGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10025AB /* BodyHashGenerator.swift */; };
 		A10026AA /* FileUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10026AB /* FileUtils.swift */; };
+		A10040AA /* DriveSocketManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10040AB /* DriveSocketManager.swift */; };
 		A10027AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A10027AB /* Assets.xcassets */; };
 		A10028AA /* AESCBCEncryptorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10028AB /* AESCBCEncryptorTests.swift */; };
 		A10029AA /* BodyHashGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10029AB /* BodyHashGeneratorTests.swift */; };
@@ -86,6 +87,7 @@
 		A10024AB /* AESCBCEncryptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AESCBCEncryptor.swift; sourceTree = "<group>"; };
 		A10025AB /* BodyHashGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyHashGenerator.swift; sourceTree = "<group>"; };
 		A10026AB /* FileUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileUtils.swift; sourceTree = "<group>"; };
+		A10040AB /* DriveSocketManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveSocketManager.swift; sourceTree = "<group>"; };
 		A10027AB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A10028AB /* AESCBCEncryptorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AESCBCEncryptorTests.swift; sourceTree = "<group>"; };
 		A10029AB /* BodyHashGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyHashGeneratorTests.swift; sourceTree = "<group>"; };
@@ -351,6 +353,7 @@
 			isa = PBXGroup;
 			children = (
 				A60018BA /* Crypto */,
+				A10040AB /* DriveSocketManager.swift */,
 				A10026AB /* FileUtils.swift */,
 			);
 			path = Utilities;
@@ -524,6 +527,7 @@
 				A10024AA /* AESCBCEncryptor.swift in Sources */,
 				A10025AA /* BodyHashGenerator.swift in Sources */,
 				A10026AA /* FileUtils.swift in Sources */,
+				A10040AA /* DriveSocketManager.swift in Sources */,
 				A10039AA /* OnlyOfficeEditorView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
