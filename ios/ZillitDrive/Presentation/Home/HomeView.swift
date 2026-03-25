@@ -15,6 +15,8 @@ struct HomeView: View {
     @State private var dropTargetId: String?
     @State private var renameItem_: DriveItem?
     @State private var renameText = ""
+    @State private var itemToDelete: DriveItem?
+    @State private var moveItem_: DriveItem?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -28,6 +30,19 @@ struct HomeView: View {
             .padding(.top, 8)
             .onChange(of: viewModel.driveSection) { newVal in
                 viewModel.switchSection(newVal)
+            }
+
+            // Storage quota (root level only)
+            if let storage = viewModel.storageUsage, viewModel.currentFolderId == nil {
+                VStack(spacing: 4) {
+                    ProgressView(value: Double(storage.usedBytes), total: max(Double(storage.totalBytes), 1))
+                        .tint(.orange)
+                    Text("\(FileUtils.formatFileSize(storage.usedBytes)) of \(FileUtils.formatFileSize(storage.totalBytes)) used")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 4)
             }
 
             // Breadcrumbs
@@ -51,6 +66,35 @@ struct HomeView: View {
                     .foregroundColor(.secondary)
 
                 Spacer()
+
+                // Tag filter
+                if !viewModel.allTags.isEmpty {
+                    Menu {
+                        Button { viewModel.setTagFilter(nil) } label: {
+                            HStack {
+                                Text("All")
+                                if viewModel.selectedTag == nil { Image(systemName: "checkmark") }
+                            }
+                        }
+                        Divider()
+                        ForEach(viewModel.allTags) { tag in
+                            Button {
+                                viewModel.setTagFilter(tag)
+                            } label: {
+                                HStack {
+                                    Circle().fill(Color.orange).frame(width: 8, height: 8)
+                                    Text(tag.name)
+                                    if viewModel.selectedTag?.id == tag.id {
+                                        Image(systemName: "checkmark")
+                                    }
+                                }
+                            }
+                        }
+                    } label: {
+                        Image(systemName: viewModel.selectedTag != nil ? "tag.fill" : "tag")
+                            .foregroundColor(viewModel.selectedTag != nil ? .orange : .secondary)
+                    }
+                }
 
                 Menu {
                     ForEach(SortOption.allCases, id: \.self) { option in
@@ -199,6 +243,33 @@ struct HomeView: View {
         } message: {
             Text("Enter a new name")
         }
+        .confirmationDialog(
+            "Delete \(itemToDelete?.name ?? "")?",
+            isPresented: Binding(get: { itemToDelete != nil }, set: { if !$0 { itemToDelete = nil } }),
+            titleVisibility: .visible
+        ) {
+            Button("Delete", role: .destructive) {
+                if let item = itemToDelete {
+                    Task { await viewModel.deleteItem(item) }
+                }
+                itemToDelete = nil
+            }
+            Button("Cancel", role: .cancel) { itemToDelete = nil }
+        } message: {
+            Text("This will move the item to trash.")
+        }
+        .sheet(item: $moveItem_) { item in
+            NavigationStack {
+                FolderPickerSheet(
+                    excludeFolderId: item.id,
+                    currentFolderId: viewModel.currentFolderId,
+                    onSelect: { targetFolderId in
+                        Task { await viewModel.moveItemToFolder(item, targetFolderId: targetFolderId) }
+                        moveItem_ = nil
+                    }
+                )
+            }
+        }
     }
 
     // MARK: - List Content
@@ -215,8 +286,9 @@ struct HomeView: View {
                     hasUnreadBadge: viewModel.fileBadges.contains(item.id),
                     onTap: { handleItemTap(item) },
                     onFavorite: { Task { await viewModel.toggleFavorite(item: item) } },
-                    onDelete: { Task { await viewModel.deleteItem(item) } },
+                    onDelete: { itemToDelete = item },
                     onShare: { shareItem(item) },
+                    onMove: { moveItem_ = item },
                     onRename: {
                         renameText = item.name
                         renameItem_ = item
@@ -274,8 +346,11 @@ struct HomeView: View {
                         } label: {
                             Label("Rename", systemImage: "pencil")
                         }
+                        Button { moveItem_ = item } label: {
+                            Label("Move", systemImage: "folder.badge.arrow.forward")
+                        }
                         Divider()
-                        Button(role: .destructive) { Task { await viewModel.deleteItem(item) } } label: {
+                        Button(role: .destructive) { itemToDelete = item } label: {
                             Label("Delete", systemImage: "trash")
                         }
                     }

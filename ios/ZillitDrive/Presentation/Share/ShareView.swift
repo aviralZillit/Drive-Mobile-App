@@ -77,6 +77,15 @@ struct FileShareView: View {
                                 Text(entry.userId)
                                     .font(.body)
                                     .lineLimit(1)
+                                Spacer()
+                                Button(role: .destructive) {
+                                    accessEntries.removeAll { $0.userId == entry.userId }
+                                } label: {
+                                    Image(systemName: "trash")
+                                        .font(.caption)
+                                        .foregroundColor(.red)
+                                }
+                                .buttonStyle(.borderless)
                             }
 
                             HStack(spacing: 16) {
@@ -276,6 +285,15 @@ struct FolderShareView: View {
                             }
 
                             Spacer()
+
+                            Button(role: .destructive) {
+                                accessEntries.remove(at: index)
+                            } label: {
+                                Image(systemName: "trash")
+                                    .font(.caption)
+                                    .foregroundColor(.red)
+                            }
+                            .buttonStyle(.borderless)
 
                             Picker("Role", selection: Binding(
                                 get: { entry.role },

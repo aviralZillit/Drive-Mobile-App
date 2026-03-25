@@ -48,4 +48,14 @@ enum FileUtils {
     static func isEditable(_ ext: String) -> Bool {
         ["docx", "xlsx", "pptx", "doc", "xls", "ppt", "odt", "ods", "odp", "csv", "txt"].contains(ext.lowercased())
     }
+
+    static func fileType(for ext: String) -> String {
+        let e = ext.lowercased()
+        if isImage(e) { return "image" }
+        if isVideo(e) { return "video" }
+        if isAudio(e) { return "audio" }
+        if isPDF(e) { return "pdf" }
+        if isOffice(e) { return "document" }
+        return "document"
+    }
 }

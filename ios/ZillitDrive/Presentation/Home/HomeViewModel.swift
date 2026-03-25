@@ -15,6 +15,9 @@ final class HomeViewModel: ObservableObject {
     @Published var driveSection: DriveSection = .myDrive
     @Published var folderBadges: [String: Int] = [:]
     @Published var fileBadges: Set<String> = []
+    @Published var storageUsage: StorageUsage?
+    @Published var allTags: [DriveTag] = []
+    @Published var selectedTag: DriveTag?
 
     private let repository: DriveRepository
     private let socketManager = DriveSocketManager()
@@ -48,6 +51,8 @@ final class HomeViewModel: ObservableObject {
 
         do {
             async let favIdsTask = try? repository.getFavoriteIds()
+            async let storageTask = try? repository.getStorageUsage()
+            async let tagsTask = try? repository.getTags()
             let contentsResult = try await repository.getFolderContents(
                 fileOptions: fileOpts, folderOptions: folderOpts
             )
@@ -64,6 +69,8 @@ final class HomeViewModel: ObservableObject {
                 favoriteFileIds = Set(favResult.fileIds ?? [])
                 favoriteFolderIds = Set(favResult.folderIds ?? [])
             }
+            if let storage = await storageTask { storageUsage = storage }
+            if let tags = await tagsTask { allTags = tags }
 
             // Client-side filtering (matches web's combinedData useMemo)
             let filteredFolders: [DriveFolder]
@@ -333,6 +340,31 @@ final class HomeViewModel: ObservableObject {
     func setSortOption(_ option: SortOption) {
         sortBy = option
         items = sortItems(items)
+    }
+
+    func setTagFilter(_ tag: DriveTag?) {
+        selectedTag = tag
+        loadTask?.cancel()
+        items = []
+        loadTask = Task { await loadContents() }
+    }
+
+    func moveItemToFolder(_ item: DriveItem, targetFolderId: String?) async {
+        do {
+            switch item {
+            case .file(let file):
+                try await repository.moveFile(fileId: file.id, targetFolderId: targetFolderId)
+            case .folder(let folder):
+                try await repository.bulkMove(
+                    items: [["item_id": folder.id, "item_type": "folder"]],
+                    targetFolderId: targetFolderId
+                )
+            }
+            items.removeAll { $0.id == item.id }
+            await loadContents()
+        } catch {
+            errorMessage = "Move failed: \(error.localizedDescription)"
+        }
     }
 
     // MARK: - Private

@@ -12,6 +12,7 @@ struct DriveItemRow: View {
     var onFavorite: () -> Void = {}
     var onDelete: () -> Void = {}
     var onShare: () -> Void = {}
+    var onMove: () -> Void = {}
     var onRename: () -> Void = {}
 
     var body: some View {
@@ -77,6 +78,10 @@ struct DriveItemRow: View {
 
                     Button { onShare() } label: {
                         Label("Share", systemImage: "person.badge.plus")
+                    }
+
+                    Button { onMove() } label: {
+                        Label("Move", systemImage: "folder.badge.arrow.forward")
                     }
 
                     if item.userPermissions?.canEdit ?? (currentUserId != nil && item.createdBy == currentUserId) {
