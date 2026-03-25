@@ -13,6 +13,8 @@ import com.zillit.drive.data.local.prefs.SessionManager
 import com.zillit.drive.data.remote.socket.DriveSocketManager
 import org.json.JSONObject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -57,6 +59,8 @@ class HomeViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState
+    private var loadJob: Job? = null
+    private var loadId: Long = 0
 
     init {
         loadContents()
@@ -67,53 +71,84 @@ class HomeViewModel @Inject constructor(
     }
 
     fun loadContents(folderId: String? = null) {
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadId++
+        val myLoadId = loadId
+
+        loadJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            val options = mutableMapOf<String, String>()
+            // Build separate options for files and folders (matching web/iOS)
+            val fileOptions = mutableMapOf<String, String>()
+            val folderOptions = mutableMapOf<String, String>()
+            val sortOpts = mapOf("sort_by" to _uiState.value.sortBy, "sort_order" to _uiState.value.sortOrder)
+            fileOptions.putAll(sortOpts)
+            folderOptions.putAll(sortOpts)
+
             if (folderId != null) {
-                options["folder_id"] = folderId
+                fileOptions["folder_id"] = folderId
+                folderOptions["parent_folder_id"] = folderId  // folders use parent_folder_id!
             } else {
-                options["root"] = "true"
-                // Apply section filter only at root (matches web behavior)
-                options["quick_filter"] = _uiState.value.driveSection.apiValue
+                // Root level: apply section filter (mine / shared)
+                val qf = _uiState.value.driveSection.apiValue
+                fileOptions["quick_filter"] = qf
+                folderOptions["quick_filter"] = qf
             }
-            options["sort_by"] = _uiState.value.sortBy
-            options["sort_order"] = _uiState.value.sortOrder
 
-            // Tag filter
             _uiState.value.selectedTag?.let { tag ->
-                options["tag_id"] = tag.id
+                fileOptions["tag_id"] = tag.id
+                folderOptions["tag_id"] = tag.id
             }
 
-            val result = repository.getFolderContents(options)
-            result.fold(
-                onSuccess = { contents ->
-                    val items = buildList {
-                        addAll(contents.folders.map { folder ->
-                            DriveItem.Folder(folder.copy(
-                                isFavorite = folder.id in _uiState.value.favoriteFolderIds
-                            ))
-                        })
-                        addAll(contents.files.map { file ->
-                            DriveItem.File(file.copy(
-                                isFavorite = file.id in _uiState.value.favoriteFileIds
-                            ))
-                        })
-                    }
-                    _uiState.update { it.copy(
-                        items = items,
-                        isLoading = false,
-                        currentFolderId = folderId
-                    ) }
-                },
-                onFailure = { error ->
-                    _uiState.update { it.copy(
-                        isLoading = false,
-                        error = error.message ?: "Failed to load contents"
-                    ) }
+            try {
+                // Two separate API calls (matches web behavior)
+                val filesResult = repository.getFiles(fileOptions)
+                val foldersResult = repository.getFolders(folderOptions)
+
+                // Stale check — discard if a newer load started
+                if (myLoadId != loadId) return@launch
+
+                val files = filesResult.getOrDefault(emptyList())
+                val folders = foldersResult.getOrDefault(emptyList())
+
+                // Client-side filtering (matches web combinedData useMemo)
+                val filteredFiles = if (folderId != null) {
+                    files.filter { it.folderId == folderId }
+                } else {
+                    files.filter { it.folderId == null || it.folderId.isNullOrEmpty() }
                 }
-            )
+                val filteredFolders = if (folderId != null) {
+                    folders.filter { it.parentFolderId == folderId }
+                } else {
+                    folders.filter { it.parentFolderId == null || it.parentFolderId.isNullOrEmpty() }
+                }
+
+                val items = buildList {
+                    addAll(filteredFolders.map { folder ->
+                        DriveItem.Folder(folder.copy(
+                            isFavorite = folder.id in _uiState.value.favoriteFolderIds
+                        ))
+                    })
+                    addAll(filteredFiles.map { file ->
+                        DriveItem.File(file.copy(
+                            isFavorite = file.id in _uiState.value.favoriteFileIds
+                        ))
+                    })
+                }
+                _uiState.update { it.copy(
+                    items = items,
+                    isLoading = false,
+                    currentFolderId = folderId
+                ) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                if (myLoadId != loadId) return@launch
+                _uiState.update { it.copy(
+                    isLoading = false,
+                    error = e.message ?: "Failed to load contents"
+                ) }
+            }
         }
     }
 
@@ -376,6 +411,7 @@ class HomeViewModel @Inject constructor(
 
     fun switchSection(section: DriveSection) {
         if (section == _uiState.value.driveSection) return
+        loadJob?.cancel()  // Cancel in-flight request to prevent race condition
         _uiState.update { it.copy(
             driveSection = section,
             folderPath = listOf(null to section.displayName),
@@ -393,51 +429,79 @@ class HomeViewModel @Inject constructor(
 
     /** Force-fetches from network (pull-to-refresh / cache bypass) */
     private fun forceLoadContents(folderId: String?) {
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadId++
+        val myLoadId = loadId
+
+        loadJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            val options = mutableMapOf<String, String>()
+            val fileOptions = mutableMapOf<String, String>()
+            val folderOptions = mutableMapOf<String, String>()
+            val sortOpts = mapOf("sort_by" to _uiState.value.sortBy, "sort_order" to _uiState.value.sortOrder)
+            fileOptions.putAll(sortOpts)
+            folderOptions.putAll(sortOpts)
+
             if (folderId != null) {
-                options["folder_id"] = folderId
+                fileOptions["folder_id"] = folderId
+                folderOptions["parent_folder_id"] = folderId
             } else {
-                options["root"] = "true"
-                options["quick_filter"] = _uiState.value.driveSection.apiValue
+                val qf = _uiState.value.driveSection.apiValue
+                fileOptions["quick_filter"] = qf
+                folderOptions["quick_filter"] = qf
             }
-            options["sort_by"] = _uiState.value.sortBy
-            options["sort_order"] = _uiState.value.sortOrder
 
             _uiState.value.selectedTag?.let { tag ->
-                options["tag_id"] = tag.id
+                fileOptions["tag_id"] = tag.id
+                folderOptions["tag_id"] = tag.id
             }
 
-            val result = repository.forceGetFolderContents(options)
-            result.fold(
-                onSuccess = { contents ->
-                    val items = buildList {
-                        addAll(contents.folders.map { folder ->
-                            DriveItem.Folder(folder.copy(
-                                isFavorite = folder.id in _uiState.value.favoriteFolderIds
-                            ))
-                        })
-                        addAll(contents.files.map { file ->
-                            DriveItem.File(file.copy(
-                                isFavorite = file.id in _uiState.value.favoriteFileIds
-                            ))
-                        })
-                    }
-                    _uiState.update { it.copy(
-                        items = items,
-                        isLoading = false,
-                        currentFolderId = folderId
-                    ) }
-                },
-                onFailure = { error ->
-                    _uiState.update { it.copy(
-                        isLoading = false,
-                        error = error.message ?: "Failed to load contents"
-                    ) }
+            try {
+                val filesResult = repository.getFiles(fileOptions)
+                val foldersResult = repository.getFolders(folderOptions)
+
+                if (myLoadId != loadId) return@launch
+
+                val files = filesResult.getOrDefault(emptyList())
+                val folders = foldersResult.getOrDefault(emptyList())
+
+                val filteredFiles = if (folderId != null) {
+                    files.filter { it.folderId == folderId }
+                } else {
+                    files.filter { it.folderId == null || it.folderId.isNullOrEmpty() }
                 }
-            )
+                val filteredFolders = if (folderId != null) {
+                    folders.filter { it.parentFolderId == folderId }
+                } else {
+                    folders.filter { it.parentFolderId == null || it.parentFolderId.isNullOrEmpty() }
+                }
+
+                val items = buildList {
+                    addAll(filteredFolders.map { folder ->
+                        DriveItem.Folder(folder.copy(
+                            isFavorite = folder.id in _uiState.value.favoriteFolderIds
+                        ))
+                    })
+                    addAll(filteredFiles.map { file ->
+                        DriveItem.File(file.copy(
+                            isFavorite = file.id in _uiState.value.favoriteFileIds
+                        ))
+                    })
+                }
+                _uiState.update { it.copy(
+                    items = items,
+                    isLoading = false,
+                    currentFolderId = folderId
+                ) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                if (myLoadId != loadId) return@launch
+                _uiState.update { it.copy(
+                    isLoading = false,
+                    error = e.message ?: "Failed to load contents"
+                ) }
+            }
         }
     }
 

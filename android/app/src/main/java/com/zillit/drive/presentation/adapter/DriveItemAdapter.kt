@@ -13,6 +13,8 @@ import com.zillit.drive.databinding.ItemDriveFileBinding
 import com.zillit.drive.domain.model.DriveFile
 import com.zillit.drive.domain.model.DriveFolder
 import com.zillit.drive.domain.model.DriveItem
+import coil.load
+import coil.transform.RoundedCornersTransformation
 import com.zillit.drive.util.FileUtils
 
 class DriveItemAdapter(
@@ -110,6 +112,20 @@ class DriveItemAdapter(
                 binding.iconBackground.background = shape
             }
             binding.tvExtBadge.setTextColor(color)
+
+            // Thumbnail for images/videos
+            val thumbnailUrl = file.thumbnailUrl
+            if (!thumbnailUrl.isNullOrEmpty() &&
+                (FileUtils.isImageFile(file.fileExtension) || FileUtils.isVideoFile(file.fileExtension))) {
+                binding.ivThumbnail.visibility = View.VISIBLE
+                binding.tvExtBadge.visibility = View.GONE
+                binding.ivThumbnail.load(thumbnailUrl) {
+                    crossfade(true)
+                    transformations(RoundedCornersTransformation(dpToPx(10f)))
+                }
+            } else {
+                binding.ivThumbnail.visibility = View.GONE
+            }
 
             // Favorite star
             binding.btnFavorite.setImageResource(
