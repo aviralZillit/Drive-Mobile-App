@@ -132,8 +132,7 @@ struct DriveItemRow: View {
                             .foregroundColor(FileUtils.extensionColor(for: file.fileExtension))
                     }
                     .resizable()
-                    .scaledToFill()
-                    .clipped()
+                    .scaledToFit()
             } else {
                 Image(systemName: iconName(for: file.fileExtension))
                     .font(.title3)
@@ -276,25 +275,20 @@ struct DriveItemGridCell: View {
         case .file(let file):
             if let previewUrl = file.previewUrl, !previewUrl.isEmpty,
                (FileUtils.isImage(file.fileExtension) || FileUtils.isVideo(file.fileExtension)) {
-                KFImage(URL(string: previewUrl))
-                    .placeholder {
-                        ZStack {
-                            Color(.secondarySystemBackground)
-                            ProgressView()
-                        }
+                ZStack {
+                    Color(.secondarySystemBackground)
+                    KFImage(URL(string: previewUrl))
+                        .placeholder { ProgressView() }
+                        .resizable()
+                        .scaledToFit()
+                        .padding(4)
+
+                    if FileUtils.isVideo(file.fileExtension) {
+                        Image(systemName: "play.circle.fill")
+                            .font(.system(size: 28))
+                            .foregroundStyle(.white, .black.opacity(0.4))
                     }
-                    .resizable()
-                    .scaledToFill()
-                    .frame(maxWidth: .infinity, maxHeight: 120)
-                    .clipped()
-                    .overlay {
-                        if FileUtils.isVideo(file.fileExtension) {
-                            // Play button overlay for videos
-                            Image(systemName: "play.circle.fill")
-                                .font(.system(size: 28))
-                                .foregroundStyle(.white, .black.opacity(0.4))
-                        }
-                    }
+                }
             } else {
                 ZStack {
                     FileUtils.extensionColor(for: file.fileExtension).opacity(0.08)
