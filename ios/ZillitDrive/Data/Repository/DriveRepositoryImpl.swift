@@ -224,11 +224,9 @@ final class DriveRepositoryImpl: DriveRepository {
         )
     }
 
-    func completeUpload(uploadId: String, parts: [[String: Any]]) async throws -> DriveFile {
-        let dto = try await DriveEndpoints.completeUpload(uploadId: uploadId, parts: parts)
-        let file = DriveMapper.toDomain(dto)
+    func completeUpload(uploadId: String, parts: [[String: Any]]) async throws {
+        try await DriveEndpoints.completeUpload(uploadId: uploadId, parts: parts)
         await cache.invalidateContents(folderId: nil)
-        return file
     }
 
     func abortUpload(uploadId: String) async throws {

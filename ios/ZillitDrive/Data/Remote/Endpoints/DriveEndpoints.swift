@@ -131,12 +131,13 @@ enum DriveEndpoints {
         return data
     }
 
-    static func completeUpload(uploadId: String, parts: [[String: Any]]) async throws -> DriveFileDTO {
-        let response: APIResponse<DriveFileDTO> = try await api.request(
+    static func completeUpload(uploadId: String, parts: [[String: Any]]) async throws {
+        // Backend returns the raw file document which may not match DriveFileDTO exactly.
+        // We only need to confirm success (status == 1), not decode the full file.
+        let response: APIResponse<AnyCodable> = try await api.request(
             endpoint: "uploads/\(uploadId)/complete", method: .post, body: ["parts": parts]
         )
-        guard let data = response.data else { throw APIError.invalidResponse }
-        return data
+        guard response.status == 1 else { throw APIError.invalidResponse }
     }
 
     static func abortUpload(uploadId: String) async throws {
@@ -347,6 +348,15 @@ enum DriveEndpoints {
 // MARK: - Helper Types
 
 struct EmptyResponse: Codable {}
+
+/// Accepts any JSON value without strict type checking
+struct AnyCodable: Codable {
+    init(from decoder: Decoder) throws {
+        // Just consume the value, we don't need it
+        _ = try? decoder.singleValueContainer()
+    }
+    func encode(to encoder: Encoder) throws {}
+}
 
 struct EditorConfigDTO: Codable {
     let collaboraUrl: String?

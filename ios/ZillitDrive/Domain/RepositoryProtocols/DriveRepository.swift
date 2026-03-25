@@ -26,7 +26,7 @@ protocol DriveRepository {
 
     // Uploads
     func initiateUpload(fileName: String, fileSizeBytes: Int64, folderId: String?, mimeType: String) async throws -> UploadSessionDTO
-    func completeUpload(uploadId: String, parts: [[String: Any]]) async throws -> DriveFile
+    func completeUpload(uploadId: String, parts: [[String: Any]]) async throws
     func abortUpload(uploadId: String) async throws
 
     // Trash

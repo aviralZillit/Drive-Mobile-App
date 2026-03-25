@@ -281,11 +281,9 @@ class MockDriveRepository: DriveRepository {
         return session
     }
 
-    func completeUpload(uploadId: String, parts: [[String: Any]]) async throws -> DriveFile {
+    func completeUpload(uploadId: String, parts: [[String: Any]]) async throws {
         completeUploadCalled += 1
         if let error = completeUploadError { throw error }
-        guard let file = completeUploadResult else { throw MockError.custom("No file configured") }
-        return file
     }
 
     func abortUpload(uploadId: String) async throws {
