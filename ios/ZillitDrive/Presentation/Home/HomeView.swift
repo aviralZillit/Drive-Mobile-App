@@ -61,11 +61,25 @@ struct HomeView: View {
                     Image(systemName: viewModel.isGridView ? "list.bullet" : "square.grid.2x2")
                 }
 
+                // Select / Done button
+                if !viewModel.items.isEmpty {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            isSelecting.toggle()
+                            if !isSelecting { selectedIds = [] }
+                        }
+                    } label: {
+                        Text(isSelecting ? "Done" : "Select")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundColor(.orange)
+                    }
+                }
+
                 Spacer()
 
-                Text("\(viewModel.items.count) items")
+                Text(isSelecting ? "\(selectedIds.count) selected" : "\(viewModel.items.count) items")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(isSelecting ? .orange : .secondary)
 
                 Spacer()
 
@@ -224,15 +238,6 @@ struct HomeView: View {
         .navigationTitle(viewModel.driveSection.displayName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                if !viewModel.items.isEmpty {
-                    Button(isSelecting ? "Done" : "Select") {
-                        isSelecting.toggle()
-                        if !isSelecting { selectedIds = [] }
-                    }
-                }
-            }
-
             ToolbarItem(placement: .navigationBarTrailing) {
                 if viewModel.driveSection == .myDrive && !isSelecting {
                     Menu {
