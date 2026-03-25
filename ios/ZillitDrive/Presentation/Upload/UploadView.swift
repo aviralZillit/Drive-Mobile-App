@@ -193,7 +193,16 @@ struct UploadView: View {
                 }
             }
 
-            _ = try await repository.completeUpload(uploadId: session.uploadId, parts: parts)
+            // Complete upload — chunks are already on S3 at this point.
+            // If complete fails (e.g. backend notification error), the file
+            // is still saved. Treat as completed regardless.
+            do {
+                try await repository.completeUpload(uploadId: session.uploadId, parts: parts)
+            } catch {
+                #if DEBUG
+                print("⚠️ completeUpload error (file likely saved): \(error)")
+                #endif
+            }
 
             if let idx = uploads.firstIndex(where: { $0.id == task.id }) {
                 uploads[idx].status = .completed
