@@ -48,9 +48,10 @@ final class SessionManagerTests: XCTestCase {
         XCTAssertTrue(sut.isLoggedIn)
         XCTAssertNotNil(sut.currentSession)
 
-        // Verify data was saved to UserDefaults
-        let savedData = UserDefaults.standard.data(forKey: testSessionKey)
-        XCTAssertNotNil(savedData)
+        // Verify session persists across reload (now stored in Keychain)
+        sut.loadSession()
+        XCTAssertNotNil(sut.currentSession)
+        XCTAssertEqual(sut.currentSession?.userId, "user123")
     }
 
     func testSaveSession_setsCurrentSession() {
@@ -108,9 +109,9 @@ final class SessionManagerTests: XCTestCase {
         XCTAssertFalse(sut.isLoggedIn)
         XCTAssertNil(sut.currentSession)
 
-        // Verify UserDefaults is cleared
-        let savedData = UserDefaults.standard.data(forKey: testSessionKey)
-        XCTAssertNil(savedData)
+        // Verify session is cleared from Keychain
+        sut.loadSession()
+        XCTAssertNil(sut.currentSession)
     }
 
     func testClearSession_calledWhenNoSession_doesNotCrash() {

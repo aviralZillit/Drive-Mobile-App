@@ -21,23 +21,60 @@ final class SessionManager: ObservableObject {
     @Published var isLoggedIn: Bool = false
     @Published var currentSession: UserSession?
 
-    private let sessionKey = "com.zillit.drive.session"
+    private let keychainService = "com.zillit.drive"
+    private let keychainAccount = "session"
 
     private init() {
         loadSession()
     }
 
     func saveSession(_ session: UserSession) {
-        if let data = try? JSONEncoder().encode(session) {
-            UserDefaults.standard.set(data, forKey: sessionKey)
-        }
+        guard let data = try? JSONEncoder().encode(session) else { return }
+
+        // Delete existing item first
+        let deleteQuery: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService,
+            kSecAttrAccount as String: keychainAccount,
+        ]
+        SecItemDelete(deleteQuery as CFDictionary)
+
+        // Add new item
+        let addQuery: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService,
+            kSecAttrAccount as String: keychainAccount,
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock,
+        ]
+        SecItemAdd(addQuery as CFDictionary, nil)
+
         currentSession = session
         isLoggedIn = true
     }
 
     func loadSession() {
-        guard let data = UserDefaults.standard.data(forKey: sessionKey),
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService,
+            kSecAttrAccount as String: keychainAccount,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne,
+        ]
+
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+
+        guard status == errSecSuccess,
+              let data = result as? Data,
               let session = try? JSONDecoder().decode(UserSession.self, from: data) else {
+            // Migrate from UserDefaults if exists
+            if let legacyData = UserDefaults.standard.data(forKey: "com.zillit.drive.session"),
+               let session = try? JSONDecoder().decode(UserSession.self, from: legacyData) {
+                saveSession(session) // Move to Keychain
+                UserDefaults.standard.removeObject(forKey: "com.zillit.drive.session")
+                return
+            }
             isLoggedIn = false
             return
         }
@@ -59,7 +96,14 @@ final class SessionManager: ObservableObject {
     }
 
     func clearSession() {
-        UserDefaults.standard.removeObject(forKey: sessionKey)
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: keychainService,
+            kSecAttrAccount as String: keychainAccount,
+        ]
+        SecItemDelete(query as CFDictionary)
+        // Also clean up legacy UserDefaults if any
+        UserDefaults.standard.removeObject(forKey: "com.zillit.drive.session")
         currentSession = nil
         isLoggedIn = false
     }

@@ -28,7 +28,7 @@ final class DriveRepositoryImplTests: XCTestCase {
             fileSizeBytes: 1024, mimeType: "application/pdf",
             folderId: nil, filePath: nil, description: nil,
             createdBy: "user1", createdOn: 0, updatedOn: 0,
-            isFavorite: false, thumbnailUrl: nil
+            thumbnailUrl: nil
         )
     }
 
@@ -36,7 +36,7 @@ final class DriveRepositoryImplTests: XCTestCase {
         DriveFolder(
             id: id, folderName: "Test", parentFolderId: nil,
             description: nil, createdBy: "user1", createdOn: 0, updatedOn: 0,
-            isFavorite: false, fileCount: 0, folderCount: 0
+            fileCount: 0, folderCount: 0
         )
     }
 

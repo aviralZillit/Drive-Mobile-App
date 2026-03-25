@@ -27,7 +27,7 @@ enum DriveMapper {
     // MARK: - File
 
     static func toDomain(_ dto: DriveFileDTO, isFavorite: Bool = false) -> DriveFile {
-        var file = DriveFile(
+        DriveFile(
             id: dto.id,
             fileName: dto.fileName,
             fileExtension: dto.fileExtension ?? "",
@@ -39,17 +39,16 @@ enum DriveMapper {
             createdBy: dto.createdBy ?? "",
             createdOn: dto.createdOn ?? 0,
             updatedOn: dto.updatedOn ?? 0,
+            thumbnailUrl: dto.attachments?.first?.thumbnail,
             isFavorite: isFavorite,
-            thumbnailUrl: dto.attachments?.first?.thumbnail
+            userPermissions: mapPermissions(dto.userPermissions, createdBy: dto.createdBy)
         )
-        file.userPermissions = mapPermissions(dto.userPermissions, createdBy: dto.createdBy)
-        return file
     }
 
     // MARK: - Folder
 
     static func toDomain(_ dto: DriveFolderDTO, isFavorite: Bool = false) -> DriveFolder {
-        var folder = DriveFolder(
+        DriveFolder(
             id: dto.id,
             folderName: dto.folderName,
             parentFolderId: dto.parentFolderId,
@@ -57,12 +56,11 @@ enum DriveMapper {
             createdBy: dto.createdBy ?? "",
             createdOn: dto.createdOn ?? 0,
             updatedOn: dto.updatedOn ?? 0,
-            isFavorite: isFavorite,
             fileCount: dto.fileCount ?? 0,
-            folderCount: dto.folderCount ?? 0
+            folderCount: dto.folderCount ?? 0,
+            isFavorite: isFavorite,
+            userPermissions: mapPermissions(dto.userPermissions, createdBy: dto.createdBy)
         )
-        folder.userPermissions = mapPermissions(dto.userPermissions, createdBy: dto.createdBy)
-        return folder
     }
 
     // MARK: - Contents (from unified items array)
@@ -74,7 +72,7 @@ enum DriveMapper {
         for item in dto.items ?? [] {
             let perms = mapPermissions(item.userPermissions, createdBy: item.createdBy)
             if item.isFolder == true || item.type == "folder" {
-                var folder = DriveFolder(
+                let folder = DriveFolder(
                     id: item.id,
                     folderName: item.folderName ?? item.name ?? "Untitled",
                     parentFolderId: item.parentFolderId,
@@ -82,14 +80,14 @@ enum DriveMapper {
                     createdBy: item.createdBy ?? "",
                     createdOn: item.createdOn ?? 0,
                     updatedOn: item.updatedOn ?? 0,
-                    isFavorite: favoriteFolderIds.contains(item.id),
                     fileCount: item.fileCount ?? 0,
-                    folderCount: item.folderCount ?? 0
+                    folderCount: item.folderCount ?? 0,
+                    isFavorite: favoriteFolderIds.contains(item.id),
+                    userPermissions: perms
                 )
-                folder.userPermissions = perms
                 folders.append(folder)
             } else {
-                var file = DriveFile(
+                let file = DriveFile(
                     id: item.id,
                     fileName: item.fileName ?? item.name ?? "Untitled",
                     fileExtension: item.fileExtension ?? "",
@@ -101,10 +99,10 @@ enum DriveMapper {
                     createdBy: item.createdBy ?? "",
                     createdOn: item.createdOn ?? 0,
                     updatedOn: item.updatedOn ?? 0,
+                    thumbnailUrl: item.attachments?.first?.thumbnail,
                     isFavorite: favoriteFileIds.contains(item.id),
-                    thumbnailUrl: item.attachments?.first?.thumbnail
+                    userPermissions: perms
                 )
-                file.userPermissions = perms
                 files.append(file)
             }
         }
@@ -192,7 +190,7 @@ enum DriveMapper {
             fileExtension: "", fileSizeBytes: 0, mimeType: "",
             folderId: nil, filePath: nil, description: nil,
             createdBy: "", createdOn: dto.deletedOn ?? 0, updatedOn: 0,
-            isFavorite: false, thumbnailUrl: nil
+            thumbnailUrl: nil
         ))
     }
 }

@@ -13,6 +13,8 @@ struct HomeView: View {
     @State private var shareItem_: DriveItem?
     @State private var draggedItem: DriveItem?
     @State private var dropTargetId: String?
+    @State private var renameItem_: DriveItem?
+    @State private var renameText = ""
 
     var body: some View {
         VStack(spacing: 0) {
@@ -182,6 +184,21 @@ struct HomeView: View {
                 }
             }
         }
+        .alert("Rename", isPresented: Binding(
+            get: { renameItem_ != nil },
+            set: { if !$0 { renameItem_ = nil } }
+        )) {
+            TextField("Name", text: $renameText)
+            Button("Cancel", role: .cancel) { renameItem_ = nil }
+            Button("Rename") {
+                if let item = renameItem_ {
+                    Task { await viewModel.renameItem(item, newName: renameText) }
+                    renameItem_ = nil
+                }
+            }
+        } message: {
+            Text("Enter a new name")
+        }
     }
 
     // MARK: - List Content
@@ -199,7 +216,11 @@ struct HomeView: View {
                     onTap: { handleItemTap(item) },
                     onFavorite: { Task { await viewModel.toggleFavorite(item: item) } },
                     onDelete: { Task { await viewModel.deleteItem(item) } },
-                    onShare: { shareItem(item) }
+                    onShare: { shareItem(item) },
+                    onRename: {
+                        renameText = item.name
+                        renameItem_ = item
+                    }
                 )
                 .onDrag {
                     draggedItem = item
@@ -225,6 +246,9 @@ struct HomeView: View {
                         item: item,
                         isFavorite: item.isFavorite,
                         isDropTarget: dropTargetId == item.id,
+                        currentUserId: sessionManager.currentSession?.userId,
+                        badgeCount: viewModel.folderBadges[item.id] ?? 0,
+                        hasUnreadBadge: viewModel.fileBadges.contains(item.id),
                         onTap: { handleItemTap(item) }
                     )
                     .onDrag {
@@ -242,8 +266,15 @@ struct HomeView: View {
                             )
                         }
                         Button { shareItem(item) } label: {
-                            Label("Share", systemImage: "square.and.arrow.up")
+                            Label("Share", systemImage: "person.badge.plus")
                         }
+                        Button {
+                            renameText = item.name
+                            renameItem_ = item
+                        } label: {
+                            Label("Rename", systemImage: "pencil")
+                        }
+                        Divider()
                         Button(role: .destructive) { Task { await viewModel.deleteItem(item) } } label: {
                             Label("Delete", systemImage: "trash")
                         }

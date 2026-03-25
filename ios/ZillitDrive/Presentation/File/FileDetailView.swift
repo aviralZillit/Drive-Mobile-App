@@ -60,6 +60,10 @@ struct FileDetailView: View {
                         actionButton(icon: "pencil.circle", title: "Edit") {
                             showEditor = true
                         }
+                    } else if FileUtils.isOffice(file.fileExtension) || FileUtils.isPDF(file.fileExtension) {
+                        actionButton(icon: "doc.viewfinder", title: "Open in Editor") {
+                            showEditor = true
+                        }
                     }
                 }
 

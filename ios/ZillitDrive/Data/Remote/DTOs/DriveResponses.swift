@@ -43,7 +43,7 @@ struct DriveFileDTO: Codable, Identifiable {
     let updatedOn: Int64?
     let deletedOn: Int64?
     let attachments: [AttachmentDTO]?
-    let userPermissions: UserPermissionsDTO?
+    var userPermissions: UserPermissionsDTO? = nil
 
     enum CodingKeys: String, CodingKey {
         case id = "_id"
@@ -81,7 +81,7 @@ struct DriveFolderDTO: Codable, Identifiable {
     let deletedOn: Int64?
     let fileCount: Int?
     let folderCount: Int?
-    let userPermissions: UserPermissionsDTO?
+    var userPermissions: UserPermissionsDTO? = nil
 
     enum CodingKeys: String, CodingKey {
         case id = "_id"
@@ -136,7 +136,7 @@ struct DriveContentItemDTO: Codable, Identifiable {
     let deletedOn: Int64?
     let fileCount: Int?
     let folderCount: Int?
-    let userPermissions: UserPermissionsDTO?
+    var userPermissions: UserPermissionsDTO? = nil
 
     enum CodingKeys: String, CodingKey {
         case id = "_id"

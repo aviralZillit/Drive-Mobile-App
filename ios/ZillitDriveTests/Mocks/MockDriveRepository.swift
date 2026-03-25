@@ -246,7 +246,7 @@ class MockDriveRepository: DriveRepository {
                 id: "new-folder", folderName: data["folder_name"] as? String ?? "",
                 parentFolderId: data["parent_folder_id"] as? String,
                 description: nil, createdBy: "user1", createdOn: 0, updatedOn: 0,
-                isFavorite: false, fileCount: 0, folderCount: 0
+                fileCount: 0, folderCount: 0
             )
         }
         return folder
@@ -435,5 +435,16 @@ class MockDriveRepository: DriveRepository {
         lastUpdateFileAccessFileId = fileId
         lastUpdateFileAccessEntries = entries
         if let error = updateFileAccessError { throw error }
+    }
+
+    // Editor
+    var getEditorPageTokenCalled = 0
+    var editorPageTokenResult = "mock-token"
+    var editorPageTokenError: Error?
+
+    func getEditorPageToken(fileId: String) async throws -> String {
+        getEditorPageTokenCalled += 1
+        if let error = editorPageTokenError { throw error }
+        return editorPageTokenResult
     }
 }

@@ -11,6 +11,7 @@ struct DriveItemRow: View {
     var onFavorite: () -> Void = {}
     var onDelete: () -> Void = {}
     var onShare: () -> Void = {}
+    var onRename: () -> Void = {}
 
     var body: some View {
         Button(action: onTap) {
@@ -73,9 +74,13 @@ struct DriveItemRow: View {
                         )
                     }
 
-                    if item.isFileItem {
-                        Button { onShare() } label: {
-                            Label("Share Link", systemImage: "link")
+                    Button { onShare() } label: {
+                        Label("Share", systemImage: "person.badge.plus")
+                    }
+
+                    if item.userPermissions?.canEdit ?? (currentUserId != nil && item.createdBy == currentUserId) {
+                        Button { onRename() } label: {
+                            Label("Rename", systemImage: "pencil")
                         }
                     }
 
@@ -155,6 +160,9 @@ struct DriveItemGridCell: View {
     let item: DriveItem
     let isFavorite: Bool
     var isDropTarget: Bool = false
+    var currentUserId: String? = nil
+    var badgeCount: Int = 0
+    var hasUnreadBadge: Bool = false
     var onTap: () -> Void = {}
 
     var body: some View {
@@ -168,19 +176,43 @@ struct DriveItemGridCell: View {
                             icon
                         }
 
-                    if isFavorite {
-                        Image(systemName: "star.fill")
-                            .font(.caption)
-                            .foregroundColor(.orange)
-                            .padding(6)
+                    // Top-right badges
+                    VStack(spacing: 4) {
+                        if isFavorite {
+                            Image(systemName: "star.fill")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                        }
+                        if badgeCount > 0 {
+                            Text("\(badgeCount)")
+                                .font(.caption2).bold()
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 1)
+                                .background(Capsule().fill(Color.orange))
+                        } else if hasUnreadBadge {
+                            Circle()
+                                .fill(Color.orange)
+                                .frame(width: 8, height: 8)
+                        }
                     }
+                    .padding(6)
                 }
 
-                Text(item.name)
-                    .font(.caption)
-                    .foregroundColor(.primary)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.center)
+                HStack(spacing: 4) {
+                    Text(item.name)
+                        .font(.caption)
+                        .foregroundColor(.primary)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.center)
+
+                    // Shared indicator
+                    if let uid = currentUserId, !item.createdBy.isEmpty, item.createdBy != uid {
+                        Image(systemName: "person.2.fill")
+                            .font(.system(size: 8))
+                            .foregroundColor(.blue)
+                    }
+                }
             }
             .overlay(
                 RoundedRectangle(cornerRadius: 12)

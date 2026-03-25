@@ -38,9 +38,9 @@ struct DriveFile: Identifiable, Equatable {
     let createdBy: String
     let createdOn: Int64
     let updatedOn: Int64
-    var isFavorite: Bool = false
     let thumbnailUrl: String?
-    var userPermissions: DrivePermissions?
+    var isFavorite: Bool = false
+    var userPermissions: DrivePermissions? = nil
 }
 
 struct DriveFolder: Identifiable, Equatable {
@@ -51,10 +51,10 @@ struct DriveFolder: Identifiable, Equatable {
     let createdBy: String
     let createdOn: Int64
     let updatedOn: Int64
-    var isFavorite: Bool = false
     let fileCount: Int
     let folderCount: Int
-    var userPermissions: DrivePermissions?
+    var isFavorite: Bool = false
+    var userPermissions: DrivePermissions? = nil
 }
 
 struct DriveContents {

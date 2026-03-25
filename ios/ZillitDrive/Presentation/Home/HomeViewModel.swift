@@ -214,6 +214,22 @@ final class HomeViewModel: ObservableObject {
         }
     }
 
+    func renameItem(_ item: DriveItem, newName: String) async {
+        let trimmed = newName.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+        do {
+            switch item {
+            case .file(let file):
+                _ = try await repository.updateFile(fileId: file.id, data: ["file_name": trimmed])
+            case .folder(let folder):
+                _ = try await repository.updateFolder(folderId: folder.id, data: ["folder_name": trimmed])
+            }
+            await loadContents()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     func moveItem(_ item: DriveItem, toFolder folder: DriveFolder) async {
         do {
             switch item {

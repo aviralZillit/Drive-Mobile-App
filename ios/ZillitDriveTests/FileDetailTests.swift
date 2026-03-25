@@ -14,7 +14,7 @@ final class FileDetailTests: XCTestCase {
         fileSizeBytes: 2048, mimeType: "application/pdf",
         folderId: "d1", filePath: "/report.pdf", description: "A report",
         createdBy: "user1", createdOn: 1700000000, updatedOn: 1700000001,
-        isFavorite: false, thumbnailUrl: nil
+        thumbnailUrl: nil
     )
 
     override func setUp() {
