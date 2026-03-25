@@ -368,4 +368,19 @@ struct FavoriteIdsDTO: Codable {
         case fileIds = "file_ids"
         case folderIds = "folder_ids"
     }
+
+    /// Backend returns `[]` (empty array) when no favorites exist,
+    /// but returns `{ file_ids: [...], folder_ids: [...] }` when there are favorites.
+    /// Handle both cases.
+    init(from decoder: Decoder) throws {
+        // First try decoding as a dictionary (normal case)
+        if let container = try? decoder.container(keyedBy: CodingKeys.self) {
+            fileIds = try? container.decode([String].self, forKey: .fileIds)
+            folderIds = try? container.decode([String].self, forKey: .folderIds)
+        } else {
+            // Backend returned [] or some other non-dict — treat as empty
+            fileIds = []
+            folderIds = []
+        }
+    }
 }

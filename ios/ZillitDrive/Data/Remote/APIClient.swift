@@ -41,11 +41,27 @@ final class APIClient {
         try await injectHeaders(into: &request, bodyString: bodyString)
 
         // Execute request
+        #if DEBUG
+        print("[API] \(method.rawValue) \(url.absoluteString)")
+        if let md = request.value(forHTTPHeaderField: "moduledata") {
+            print("[API] moduledata: \(String(md.prefix(80)))...")
+        }
+        if let bh = request.value(forHTTPHeaderField: "bodyhash") {
+            print("[API] bodyhash: \(bh)")
+        }
+        #endif
         let (data, response) = try await session.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
         }
+
+        #if DEBUG
+        print("[API] \(method.rawValue) \(url.path) → \(httpResponse.statusCode) (\(data.count) bytes)")
+        if httpResponse.statusCode >= 400, let body = String(data: data, encoding: .utf8) {
+            print("[API] Error body: \(String(body.prefix(500)))")
+        }
+        #endif
 
         if httpResponse.statusCode == 401 {
             sessionManager.clearSession()
