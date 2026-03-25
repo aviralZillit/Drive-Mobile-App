@@ -55,6 +55,15 @@ class UploadFragment : Fragment() {
             },
             onRemoveClick = { item ->
                 viewModel.removeCompletedUpload(item.uploadId)
+            },
+            onPauseClick = { item ->
+                viewModel.pauseUpload(item.uploadId)
+            },
+            onResumeClick = { item ->
+                viewModel.resumeUpload(item.uploadId)
+            },
+            onRetryClick = { item ->
+                viewModel.retryUpload(item.uploadId)
             }
         )
         binding.recyclerView.adapter = adapter
@@ -78,7 +87,7 @@ class UploadFragment : Fragment() {
                     binding.recyclerView.visibility =
                         if (state.activeUploads.isNotEmpty()) View.VISIBLE else View.GONE
 
-                    adapter.submitList(state.activeUploads)
+                    adapter.submitList(state.activeUploads.toList())
 
                     state.error?.let { errorMsg ->
                         Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_LONG).show()

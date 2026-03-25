@@ -30,6 +30,9 @@
         <action
             android:id="@+id/action_home_to_file_detail"
             app:destination="@id/fileDetailFragment" />
+        <action
+            android:id="@+id/action_home_to_share"
+            app:destination="@id/shareFragment" />
     </fragment>
 
     <fragment

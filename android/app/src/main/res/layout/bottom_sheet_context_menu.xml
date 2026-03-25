@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -14,46 +15,7 @@
         android:paddingStart="16dp"
         android:text="Open"
         android:textSize="16sp"
-        android:background="?attr/selectableItemBackground" />
-
-    <TextView
-        android:id="@+id/menuRename"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:gravity="center_vertical"
-        android:paddingStart="16dp"
-        android:text="Rename"
-        android:textSize="16sp"
-        android:background="?attr/selectableItemBackground" />
-
-    <TextView
-        android:id="@+id/menuMove"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:gravity="center_vertical"
-        android:paddingStart="16dp"
-        android:text="Move to..."
-        android:textSize="16sp"
-        android:background="?attr/selectableItemBackground" />
-
-    <TextView
-        android:id="@+id/menuShare"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:gravity="center_vertical"
-        android:paddingStart="16dp"
-        android:text="Share"
-        android:textSize="16sp"
-        android:background="?attr/selectableItemBackground" />
-
-    <TextView
-        android:id="@+id/menuDownload"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:gravity="center_vertical"
-        android:paddingStart="16dp"
-        android:text="Download"
-        android:textSize="16sp"
+        android:drawablePadding="16dp"
         android:background="?attr/selectableItemBackground" />
 
     <TextView
@@ -64,6 +26,51 @@
         android:paddingStart="16dp"
         android:text="Add to favorites"
         android:textSize="16sp"
+        android:drawablePadding="16dp"
+        android:background="?attr/selectableItemBackground" />
+
+    <TextView
+        android:id="@+id/menuShare"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:text="Share"
+        android:textSize="16sp"
+        android:drawablePadding="16dp"
+        android:background="?attr/selectableItemBackground" />
+
+    <TextView
+        android:id="@+id/menuMove"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:text="Move to..."
+        android:textSize="16sp"
+        android:drawablePadding="16dp"
+        android:background="?attr/selectableItemBackground" />
+
+    <TextView
+        android:id="@+id/menuRename"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:text="Rename"
+        android:textSize="16sp"
+        android:drawablePadding="16dp"
+        android:background="?attr/selectableItemBackground" />
+
+    <TextView
+        android:id="@+id/menuDownload"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:text="Copy link"
+        android:textSize="16sp"
+        android:drawablePadding="16dp"
         android:background="?attr/selectableItemBackground" />
 
     <View
@@ -81,6 +88,7 @@
         android:text="Delete"
         android:textSize="16sp"
         android:textColor="#E53935"
+        android:drawablePadding="16dp"
         android:background="?attr/selectableItemBackground" />
 
 </LinearLayout>

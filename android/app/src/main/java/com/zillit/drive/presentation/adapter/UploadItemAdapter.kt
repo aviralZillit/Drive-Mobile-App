@@ -13,7 +13,10 @@ import com.zillit.drive.util.FileUtils
 
 class UploadItemAdapter(
     private val onCancelClick: (UploadItemState) -> Unit,
-    private val onRemoveClick: (UploadItemState) -> Unit
+    private val onRemoveClick: (UploadItemState) -> Unit,
+    private val onPauseClick: (UploadItemState) -> Unit = {},
+    private val onResumeClick: (UploadItemState) -> Unit = {},
+    private val onRetryClick: (UploadItemState) -> Unit = {}
 ) : ListAdapter<UploadItemState, UploadItemAdapter.ViewHolder>(UploadItemDiffCallback()) {
 
     inner class ViewHolder(
@@ -30,18 +33,8 @@ class UploadItemAdapter(
                 binding.tvExtBadge.setBackgroundColor(FileUtils.getExtensionColor(extension.lowercase()))
             }
 
-            // Status text
-            val sizeText = FileUtils.formatFileSize(item.fileSizeBytes)
-            binding.tvStatus.text = when (item.status) {
-                UploadStatus.PENDING -> "$sizeText \u2022 Pending"
-                UploadStatus.UPLOADING -> {
-                    val percent = (item.progress * 100).toInt()
-                    "$sizeText \u2022 Uploading $percent%"
-                }
-                UploadStatus.COMPLETED -> "$sizeText \u2022 Completed"
-                UploadStatus.FAILED -> "$sizeText \u2022 Failed${item.errorMessage?.let { ": $it" } ?: ""}"
-                UploadStatus.CANCELLED -> "$sizeText \u2022 Cancelled"
-            }
+            // Status text (using computed property from UploadItemState)
+            binding.tvStatus.text = item.statusText
 
             // Status text color
             binding.tvStatus.setTextColor(
@@ -49,13 +42,14 @@ class UploadItemAdapter(
                     UploadStatus.COMPLETED -> 0xFF2E7D32.toInt() // green
                     UploadStatus.FAILED -> 0xFFE53935.toInt()    // red
                     UploadStatus.CANCELLED -> 0xFF8F9BB3.toInt() // grey
+                    UploadStatus.PAUSED -> 0xFFF99300.toInt()    // orange
                     else -> 0xFF5F6D88.toInt()                   // default secondary
                 }
             )
 
             // Progress bar
             when (item.status) {
-                UploadStatus.UPLOADING -> {
+                UploadStatus.UPLOADING, UploadStatus.PAUSED -> {
                     binding.progressBarUpload.visibility = View.VISIBLE
                     binding.progressBarUpload.progress = (item.progress * 1000).toInt()
                 }
@@ -68,9 +62,49 @@ class UploadItemAdapter(
                 }
             }
 
+            // Speed + ETA text
+            if (item.status == UploadStatus.UPLOADING && item.speed > 0) {
+                binding.tvSpeedEta.visibility = View.VISIBLE
+                val speedText = FileUtils.formatFileSize(item.speed.toLong()) + "/s"
+                val etaText = if (item.eta > 0) formatEta(item.eta) else ""
+                binding.tvSpeedEta.text = buildString {
+                    append(speedText)
+                    if (etaText.isNotEmpty()) append(" \u2022 $etaText remaining")
+                }
+            } else {
+                binding.tvSpeedEta.visibility = View.GONE
+            }
+
+            // Pause/Resume button
+            when (item.status) {
+                UploadStatus.UPLOADING -> {
+                    binding.btnPauseResume.visibility = View.VISIBLE
+                    binding.btnPauseResume.setImageResource(android.R.drawable.ic_media_pause)
+                    binding.btnPauseResume.contentDescription = "Pause upload"
+                    binding.btnPauseResume.setOnClickListener { onPauseClick(item) }
+                }
+                UploadStatus.PAUSED -> {
+                    binding.btnPauseResume.visibility = View.VISIBLE
+                    binding.btnPauseResume.setImageResource(android.R.drawable.ic_media_play)
+                    binding.btnPauseResume.contentDescription = "Resume upload"
+                    binding.btnPauseResume.setOnClickListener { onResumeClick(item) }
+                }
+                else -> {
+                    binding.btnPauseResume.visibility = View.GONE
+                }
+            }
+
+            // Retry button (for failed uploads)
+            if (item.status == UploadStatus.FAILED) {
+                binding.btnRetry.visibility = View.VISIBLE
+                binding.btnRetry.setOnClickListener { onRetryClick(item) }
+            } else {
+                binding.btnRetry.visibility = View.GONE
+            }
+
             // Cancel / Remove button
             when (item.status) {
-                UploadStatus.PENDING, UploadStatus.UPLOADING -> {
+                UploadStatus.PENDING, UploadStatus.UPLOADING, UploadStatus.PAUSED -> {
                     binding.btnCancel.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
                     binding.btnCancel.contentDescription = "Cancel upload"
                     binding.btnCancel.setOnClickListener { onCancelClick(item) }
@@ -80,6 +114,14 @@ class UploadItemAdapter(
                     binding.btnCancel.contentDescription = "Remove from list"
                     binding.btnCancel.setOnClickListener { onRemoveClick(item) }
                 }
+            }
+        }
+
+        private fun formatEta(seconds: Long): String {
+            return when {
+                seconds < 60 -> "${seconds}s"
+                seconds < 3600 -> "${seconds / 60}m ${seconds % 60}s"
+                else -> "${seconds / 3600}h ${(seconds % 3600) / 60}m"
             }
         }
     }

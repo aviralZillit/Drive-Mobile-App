@@ -28,6 +28,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.zillit.drive.R
 import com.zillit.drive.domain.model.FileAccess
 import com.zillit.drive.domain.model.FolderAccess
@@ -202,12 +203,10 @@ class ShareFragment : Fragment() {
                 setPadding(dp(16), dp(14), dp(16), dp(14))
             }
 
-            // User ID header
-            val tvUser = TextView(requireContext()).apply {
-                text = entry.userId
-                textSize = 15f
-                setTextColor(Color.parseColor("#12213F"))
-                setTypeface(typeface, android.graphics.Typeface.BOLD)
+            // Header row: User ID + Remove button
+            val headerRow = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
                 layoutParams = LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
@@ -215,7 +214,43 @@ class ShareFragment : Fragment() {
                     bottomMargin = dp(10)
                 }
             }
-            cardContent.addView(tvUser)
+
+            val tvUser = TextView(requireContext()).apply {
+                text = entry.userId
+                textSize = 15f
+                setTextColor(Color.parseColor("#12213F"))
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                layoutParams = LinearLayout.LayoutParams(
+                    0,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    1f
+                )
+            }
+            headerRow.addView(tvUser)
+
+            // Remove button
+            val btnRemove = ImageButton(requireContext()).apply {
+                setImageResource(android.R.drawable.ic_menu_delete)
+                background = null
+                contentDescription = "Remove access"
+                setColorFilter(Color.parseColor("#E53935"))
+                layoutParams = LinearLayout.LayoutParams(
+                    dp(32), dp(32)
+                )
+                setOnClickListener {
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Remove access")
+                        .setMessage("Remove access for ${entry.userId}?")
+                        .setPositiveButton("Remove") { _, _ ->
+                            viewModel.removeFileAccess(entry.userId)
+                        }
+                        .setNegativeButton("Cancel", null)
+                        .show()
+                }
+            }
+            headerRow.addView(btnRemove)
+
+            cardContent.addView(headerRow)
 
             // Can View switch
             cardContent.addView(createPermissionSwitch("Can View", entry.canView) { isChecked ->
@@ -367,6 +402,30 @@ class ShareFragment : Fragment() {
                 }
             }
             cardContent.addView(spinner)
+
+            // Remove button for folder access
+            val btnRemove = ImageButton(requireContext()).apply {
+                setImageResource(android.R.drawable.ic_menu_delete)
+                background = null
+                contentDescription = "Remove access"
+                setColorFilter(Color.parseColor("#E53935"))
+                layoutParams = LinearLayout.LayoutParams(
+                    dp(32), dp(32)
+                ).apply {
+                    marginStart = dp(8)
+                }
+                setOnClickListener {
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Remove access")
+                        .setMessage("Remove access for ${entry.userId}?")
+                        .setPositiveButton("Remove") { _, _ ->
+                            viewModel.removeFolderAccess(entry.userId)
+                        }
+                        .setNegativeButton("Cancel", null)
+                        .show()
+                }
+            }
+            cardContent.addView(btnRemove)
 
             card.addView(cardContent)
             accessContainer.addView(card)

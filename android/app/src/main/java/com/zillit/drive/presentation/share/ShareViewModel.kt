@@ -105,6 +105,28 @@ class ShareViewModel @Inject constructor(
         }
     }
 
+    // ─── Remove Access ───
+
+    fun removeFileAccess(userId: String) {
+        _uiState.update { state ->
+            state.copy(
+                fileAccessEntries = state.fileAccessEntries.filter { it.userId != userId }
+            )
+        }
+        // Auto-save after removal
+        savePermissions()
+    }
+
+    fun removeFolderAccess(userId: String) {
+        _uiState.update { state ->
+            state.copy(
+                folderAccessEntries = state.folderAccessEntries.filter { it.userId != userId }
+            )
+        }
+        // Auto-save after removal
+        savePermissions()
+    }
+
     fun savePermissions() {
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, error = null, saveSuccess = false) }

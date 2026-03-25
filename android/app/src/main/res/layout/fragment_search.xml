@@ -57,6 +57,89 @@
 
     </com.google.android.material.card.MaterialCardView>
 
+    <!-- Filter chips row -->
+    <HorizontalScrollView
+        android:id="@+id/filterChipScroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:paddingHorizontal="16dp"
+        android:layout_marginBottom="8dp">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupFilters"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:singleSelection="true"
+            app:selectionRequired="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipAll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="All"
+                android:checked="true"
+                app:chipBackgroundColor="#F5F6FA"
+                app:chipStrokeColor="#E8EBF0"
+                app:chipStrokeWidth="1dp"
+                style="@style/Widget.MaterialComponents.Chip.Choice" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipImages"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Images"
+                app:chipBackgroundColor="#F5F6FA"
+                app:chipStrokeColor="#E8EBF0"
+                app:chipStrokeWidth="1dp"
+                style="@style/Widget.MaterialComponents.Chip.Choice" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipVideos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Videos"
+                app:chipBackgroundColor="#F5F6FA"
+                app:chipStrokeColor="#E8EBF0"
+                app:chipStrokeWidth="1dp"
+                style="@style/Widget.MaterialComponents.Chip.Choice" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipDocuments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Documents"
+                app:chipBackgroundColor="#F5F6FA"
+                app:chipStrokeColor="#E8EBF0"
+                app:chipStrokeWidth="1dp"
+                style="@style/Widget.MaterialComponents.Chip.Choice" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipPdf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PDF"
+                app:chipBackgroundColor="#F5F6FA"
+                app:chipStrokeColor="#E8EBF0"
+                app:chipStrokeWidth="1dp"
+                style="@style/Widget.MaterialComponents.Chip.Choice" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipDateRange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Date range"
+                app:chipBackgroundColor="#F5F6FA"
+                app:chipStrokeColor="#E8EBF0"
+                app:chipStrokeWidth="1dp"
+                app:chipIcon="@android:drawable/ic_menu_my_calendar"
+                app:chipIconSize="18dp"
+                style="@style/Widget.MaterialComponents.Chip.Action" />
+
+        </com.google.android.material.chip.ChipGroup>
+
+    </HorizontalScrollView>
+
     <!-- Content area (FrameLayout to stack states) -->
     <FrameLayout
         android:layout_width="match_parent"

@@ -27,8 +27,8 @@ android {
     buildTypes {
         debug {
             isMinifyEnabled = false
-            buildConfigField("String", "DRIVE_BASE_URL", "\"${project.findProperty("DRIVE_BASE_URL_DEV") ?: "http://10.0.2.2:8105/api"}\"")
-            buildConfigField("String", "SOCKET_URL", "\"${project.findProperty("SOCKET_URL_DEV") ?: "http://10.0.2.2:8105"}\"")
+            buildConfigField("String", "DRIVE_BASE_URL", "\"${project.findProperty("DRIVE_BASE_URL_DEV") ?: "https://driveapi-dev.zillit.com/api"}\"")
+            buildConfigField("String", "SOCKET_URL", "\"${project.findProperty("SOCKET_URL_DEV") ?: "https://driveapi-dev.zillit.com"}\"")
             buildConfigField("String", "ENVIRONMENT", "\"development\"")
         }
         release {

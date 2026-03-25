@@ -6,6 +6,8 @@ import com.zillit.drive.BuildConfig
 import com.zillit.drive.domain.model.DriveContents
 import com.zillit.drive.domain.model.DriveItem
 import com.zillit.drive.domain.model.DriveSection
+import com.zillit.drive.domain.model.DriveTag
+import com.zillit.drive.domain.model.StorageUsage
 import com.zillit.drive.domain.repository.DriveRepository
 import com.zillit.drive.data.local.prefs.SessionManager
 import com.zillit.drive.data.remote.socket.DriveSocketManager
@@ -30,7 +32,17 @@ data class HomeUiState(
     val isGridView: Boolean = false,
     val driveSection: DriveSection = DriveSection.MY_DRIVE,
     val folderBadges: Map<String, Int> = emptyMap(),
-    val fileBadges: Set<String> = emptySet()
+    val fileBadges: Set<String> = emptySet(),
+    // Multi-select
+    val isSelecting: Boolean = false,
+    val selectedIds: Set<String> = emptySet(),
+    // Storage
+    val storageUsage: StorageUsage? = null,
+    // Tags
+    val allTags: List<DriveTag> = emptyList(),
+    val selectedTag: DriveTag? = null,
+    // Folder list for move picker
+    val rootFolders: List<Pair<String, String>> = emptyList() // id to name
 )
 
 @HiltViewModel
@@ -49,6 +61,8 @@ class HomeViewModel @Inject constructor(
     init {
         loadContents()
         loadFavoriteIds()
+        loadStorageUsage()
+        loadTags()
         setupSocket()
     }
 
@@ -66,6 +80,11 @@ class HomeViewModel @Inject constructor(
             }
             options["sort_by"] = _uiState.value.sortBy
             options["sort_order"] = _uiState.value.sortOrder
+
+            // Tag filter
+            _uiState.value.selectedTag?.let { tag ->
+                options["tag_id"] = tag.id
+            }
 
             val result = repository.getFolderContents(options)
             result.fold(
@@ -167,6 +186,185 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    // ─── Move Item ───
+
+    fun moveItem(itemId: String, itemType: String, targetFolderId: String?) {
+        viewModelScope.launch {
+            val result = when (itemType) {
+                "file" -> repository.moveFile(itemId, targetFolderId)
+                "folder" -> repository.moveFolder(itemId, targetFolderId)
+                else -> return@launch
+            }
+            result.fold(
+                onSuccess = {
+                    // Remove from current list since it moved
+                    _uiState.update { state ->
+                        state.copy(items = state.items.filter { it.id != itemId })
+                    }
+                },
+                onFailure = { error ->
+                    _uiState.update { it.copy(error = error.message ?: "Failed to move item") }
+                }
+            )
+        }
+    }
+
+    // ─── Rename Item ───
+
+    fun renameItem(itemId: String, itemType: String, newName: String) {
+        viewModelScope.launch {
+            val result = when (itemType) {
+                "file" -> repository.updateFile(itemId, mapOf("file_name" to newName))
+                "folder" -> repository.updateFolder(itemId, mapOf("folder_name" to newName))
+                else -> return@launch
+            }
+            result.fold(
+                onSuccess = {
+                    // Update item name in local list
+                    _uiState.update { state ->
+                        state.copy(items = state.items.map { item ->
+                            when {
+                                item.id == itemId && item is DriveItem.File ->
+                                    DriveItem.File(item.file.copy(fileName = newName))
+                                item.id == itemId && item is DriveItem.Folder ->
+                                    DriveItem.Folder(item.folder.copy(folderName = newName))
+                                else -> item
+                            }
+                        })
+                    }
+                },
+                onFailure = { error ->
+                    _uiState.update { it.copy(error = error.message ?: "Failed to rename item") }
+                }
+            )
+        }
+    }
+
+    // ─── Multi-Select ───
+
+    fun enterSelectMode(initialItem: DriveItem? = null) {
+        _uiState.update { state ->
+            state.copy(
+                isSelecting = true,
+                selectedIds = if (initialItem != null) setOf(initialItem.id) else emptySet()
+            )
+        }
+    }
+
+    fun exitSelectMode() {
+        _uiState.update { it.copy(isSelecting = false, selectedIds = emptySet()) }
+    }
+
+    fun toggleSelection(item: DriveItem) {
+        _uiState.update { state ->
+            val newIds = state.selectedIds.toMutableSet()
+            if (item.id in newIds) newIds.remove(item.id) else newIds.add(item.id)
+            state.copy(selectedIds = newIds)
+        }
+    }
+
+    fun bulkDelete() {
+        val state = _uiState.value
+        if (state.selectedIds.isEmpty()) return
+
+        viewModelScope.launch {
+            val items = state.items.filter { it.id in state.selectedIds }
+            val bulkItems = items.map { item ->
+                val type = when (item) {
+                    is DriveItem.File -> "file"
+                    is DriveItem.Folder -> "folder"
+                }
+                item.id to type
+            }
+
+            repository.bulkDelete(bulkItems).fold(
+                onSuccess = {
+                    _uiState.update { s ->
+                        s.copy(
+                            items = s.items.filter { it.id !in state.selectedIds },
+                            isSelecting = false,
+                            selectedIds = emptySet()
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    _uiState.update { it.copy(error = error.message ?: "Failed to delete selected items") }
+                }
+            )
+        }
+    }
+
+    fun bulkMove(targetFolderId: String?) {
+        val state = _uiState.value
+        if (state.selectedIds.isEmpty()) return
+
+        viewModelScope.launch {
+            val items = state.items.filter { it.id in state.selectedIds }
+            val bulkItems = items.map { item ->
+                val type = when (item) {
+                    is DriveItem.File -> "file"
+                    is DriveItem.Folder -> "folder"
+                }
+                item.id to type
+            }
+
+            repository.bulkMove(bulkItems, targetFolderId).fold(
+                onSuccess = {
+                    _uiState.update { s ->
+                        s.copy(
+                            items = s.items.filter { it.id !in state.selectedIds },
+                            isSelecting = false,
+                            selectedIds = emptySet()
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    _uiState.update { it.copy(error = error.message ?: "Failed to move selected items") }
+                }
+            )
+        }
+    }
+
+    // ─── Storage ───
+
+    private fun loadStorageUsage() {
+        viewModelScope.launch {
+            repository.getStorageUsage().onSuccess { usage ->
+                _uiState.update { it.copy(storageUsage = usage) }
+            }
+        }
+    }
+
+    // ─── Tags ───
+
+    fun loadTags() {
+        viewModelScope.launch {
+            repository.getTags().onSuccess { tags ->
+                _uiState.update { it.copy(allTags = tags) }
+            }
+        }
+    }
+
+    fun setTagFilter(tag: DriveTag?) {
+        _uiState.update { it.copy(selectedTag = tag) }
+        loadContents(_uiState.value.currentFolderId)
+    }
+
+    // ─── Folder Picker ───
+
+    fun loadRootFolders() {
+        viewModelScope.launch {
+            val options = mapOf("root" to "true", "quick_filter" to "mine")
+            repository.getFolderContents(options).onSuccess { contents ->
+                _uiState.update { it.copy(
+                    rootFolders = contents.folders.map { f -> f.id to f.folderName }
+                ) }
+            }
+        }
+    }
+
+    // ─── Sorting / View ───
+
     fun setSortBy(sortBy: String) {
         _uiState.update { it.copy(sortBy = sortBy) }
         loadContents(_uiState.value.currentFolderId)
@@ -190,6 +388,7 @@ class HomeViewModel @Inject constructor(
     fun refresh() {
         forceLoadContents(_uiState.value.currentFolderId)
         loadFavoriteIds()
+        loadStorageUsage()
     }
 
     /** Force-fetches from network (pull-to-refresh / cache bypass) */
@@ -206,6 +405,10 @@ class HomeViewModel @Inject constructor(
             }
             options["sort_by"] = _uiState.value.sortBy
             options["sort_order"] = _uiState.value.sortOrder
+
+            _uiState.value.selectedTag?.let { tag ->
+                options["tag_id"] = tag.id
+            }
 
             val result = repository.forceGetFolderContents(options)
             result.fold(
@@ -238,6 +441,10 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun clearError() {
+        _uiState.update { it.copy(error = null) }
+    }
+
     // ─── Socket.IO Real-Time Events ───
 
     private fun setupSocket() {
@@ -247,12 +454,12 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             socketManager.events.collect { event ->
                 when (event.event) {
-                    // Drive data changes → refetch
+                    // Drive data changes -> refetch
                     "drive:file:added", "drive:file:updated", "drive:file:deleted",
                     "drive:folder:created", "drive:folder:updated", "drive:folder:deleted" -> {
                         refresh()
                     }
-                    // Sharing events → check if relevant to current user
+                    // Sharing events -> check if relevant to current user
                     "drive:folder:shared", "drive:file:shared" -> {
                         val json = event.data as? JSONObject
                         val sharedWith = json?.optJSONArray("shared_with")
@@ -264,7 +471,7 @@ class HomeViewModel @Inject constructor(
                             }
                         }
                     }
-                    // New badge received → update counts
+                    // New badge received -> update counts
                     "notification:save" -> {
                         val json = event.data as? JSONObject ?: return@collect
                         val tool = json.optString("tool")

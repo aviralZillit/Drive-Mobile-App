@@ -33,7 +33,7 @@
         android:layout_marginEnd="8dp"
         app:layout_constraintTop_toTopOf="@id/tvExtBadge"
         app:layout_constraintStart_toEndOf="@id/tvExtBadge"
-        app:layout_constraintEnd_toStartOf="@id/btnCancel" />
+        app:layout_constraintEnd_toStartOf="@id/btnPauseResume" />
 
     <!-- File size and status -->
     <TextView
@@ -48,7 +48,7 @@
         android:layout_marginTop="2dp"
         app:layout_constraintTop_toBottomOf="@id/tvFileName"
         app:layout_constraintStart_toEndOf="@id/tvExtBadge"
-        app:layout_constraintEnd_toStartOf="@id/btnCancel" />
+        app:layout_constraintEnd_toStartOf="@id/btnPauseResume" />
 
     <!-- Progress bar -->
     <ProgressBar
@@ -63,6 +63,50 @@
         android:progressDrawable="@android:drawable/progress_horizontal"
         app:layout_constraintTop_toBottomOf="@id/tvStatus"
         app:layout_constraintStart_toEndOf="@id/tvExtBadge"
+        app:layout_constraintEnd_toStartOf="@id/btnPauseResume" />
+
+    <!-- Speed and ETA text below progress bar -->
+    <TextView
+        android:id="@+id/tvSpeedEta"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="11sp"
+        android:textColor="#8F9BB3"
+        android:maxLines="1"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="2dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/progressBarUpload"
+        app:layout_constraintStart_toEndOf="@id/tvExtBadge"
+        app:layout_constraintEnd_toStartOf="@id/btnPauseResume" />
+
+    <!-- Pause/Resume button -->
+    <ImageButton
+        android:id="@+id/btnPauseResume"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@android:drawable/ic_media_pause"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:scaleType="centerInside"
+        android:contentDescription="Pause/Resume upload"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnRetry" />
+
+    <!-- Retry button (for failed uploads) -->
+    <ImageButton
+        android:id="@+id/btnRetry"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@android:drawable/ic_popup_sync"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:scaleType="centerInside"
+        android:contentDescription="Retry upload"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btnCancel" />
 
     <!-- Cancel / Remove button -->

@@ -21,7 +21,10 @@ class DriveItemAdapter(
     private val onFavoriteClick: (DriveItem) -> Unit,
     var currentUserId: String? = null,
     var folderBadges: Map<String, Int> = emptyMap(),
-    var fileBadges: Set<String> = emptySet()
+    var fileBadges: Set<String> = emptySet(),
+    var isSelecting: Boolean = false,
+    var selectedIds: Set<String> = emptySet(),
+    private val onSelectionToggle: ((DriveItem) -> Unit)? = null
 ) : ListAdapter<DriveItem, DriveItemAdapter.ViewHolder>(DriveItemDiffCallback()) {
 
     inner class ViewHolder(
@@ -32,6 +35,16 @@ class DriveItemAdapter(
             when (item) {
                 is DriveItem.File -> bindFile(item.file, item)
                 is DriveItem.Folder -> bindFolder(item.folder, item)
+            }
+
+            // Selection checkbox
+            if (isSelecting) {
+                binding.cbSelect.visibility = View.VISIBLE
+                binding.cbSelect.isChecked = selectedIds.contains(item.id)
+                binding.btnFavorite.visibility = View.GONE
+            } else {
+                binding.cbSelect.visibility = View.GONE
+                binding.btnFavorite.visibility = View.VISIBLE
             }
 
             // Shared indicator
@@ -55,7 +68,13 @@ class DriveItemAdapter(
                 binding.tvBadgeCount.visibility = View.GONE
             }
 
-            binding.root.setOnClickListener { onItemClick(item) }
+            binding.root.setOnClickListener {
+                if (isSelecting) {
+                    onSelectionToggle?.invoke(item)
+                } else {
+                    onItemClick(item)
+                }
+            }
             binding.root.setOnLongClickListener {
                 onItemLongClick(item)
                 true
@@ -68,7 +87,7 @@ class DriveItemAdapter(
             binding.tvSubtitle.text = buildString {
                 append(FileUtils.formatFileSize(file.fileSizeBytes))
                 if (file.fileExtension.isNotEmpty()) {
-                    append(" · ")
+                    append(" \u00b7 ")
                     append(file.fileExtension.uppercase())
                 }
             }
