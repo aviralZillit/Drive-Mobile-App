@@ -1,5 +1,7 @@
 import SwiftUI
 import QuickLook
+import Kingfisher
+import AVKit
 
 struct FileDetailView: View {
     let file: DriveFile
@@ -16,15 +18,41 @@ struct FileDetailView: View {
     @State private var selectedTab = 0
     @State private var showEditor = false
     @State private var editorMode = "edit"
+    @State private var mediaPreviewUrl: String?
+    @State private var videoPlayer: AVPlayer?
     private let repository: DriveRepository = DriveRepositoryImpl()
 
     var body: some View {
         VStack(spacing: 0) {
-            // File info header
+            // File info header with inline media preview
             VStack(spacing: 8) {
-                Image(systemName: iconName)
-                    .font(.system(size: 48))
-                    .foregroundColor(FileUtils.extensionColor(for: file.fileExtension))
+                // Image preview
+                if FileUtils.isImage(file.fileExtension), let urlStr = mediaPreviewUrl ?? file.previewUrl,
+                   let url = URL(string: urlStr) {
+                    KFImage(url)
+                        .placeholder {
+                            ZStack {
+                                Color(.secondarySystemBackground)
+                                ProgressView()
+                            }
+                        }
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxHeight: 250)
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+                // Video player
+                } else if FileUtils.isVideo(file.fileExtension), let player = videoPlayer {
+                    VideoPlayer(player: player)
+                        .frame(height: 220)
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+                // Fallback icon
+                } else {
+                    Image(systemName: iconName)
+                        .font(.system(size: 48))
+                        .foregroundColor(FileUtils.extensionColor(for: file.fileExtension))
+                }
 
                 Text(file.fileName)
                     .font(.headline)
@@ -40,6 +68,7 @@ struct FileDetailView: View {
                 .foregroundColor(.secondary)
             }
             .padding()
+            .task { await loadMediaPreview() }
 
             // Action buttons
             VStack(spacing: 8) {
@@ -402,6 +431,24 @@ struct FileDetailView: View {
             isDownloading = false
             #if DEBUG
             print("🔴 Preview error: \(error)")
+            #endif
+        }
+    }
+
+    // MARK: - Media Preview
+
+    private func loadMediaPreview() async {
+        guard FileUtils.isImage(file.fileExtension) || FileUtils.isVideo(file.fileExtension) else { return }
+        do {
+            let urlStr = try await repository.getFilePreviewUrl(fileId: file.id)
+            if FileUtils.isImage(file.fileExtension) {
+                mediaPreviewUrl = urlStr
+            } else if FileUtils.isVideo(file.fileExtension), let url = URL(string: urlStr) {
+                videoPlayer = AVPlayer(url: url)
+            }
+        } catch {
+            #if DEBUG
+            print("🔴 Media preview load error: \(error)")
             #endif
         }
     }
