@@ -1,8 +1,11 @@
 import SwiftUI
+import PhotosUI
 import UniformTypeIdentifiers
 
 struct UploadView: View {
     @State private var showFilePicker = false
+    @State private var showPhotoPicker = false
+    @State private var selectedPhotos: [PhotosPickerItem] = []
     @State private var uploads: [UploadTask] = []
     @EnvironmentObject var sessionManager: SessionManager
     private let repository: DriveRepository = DriveRepositoryImpl()
@@ -21,13 +24,23 @@ struct UploadView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
 
-                    Button {
-                        showFilePicker = true
-                    } label: {
-                        Label("Choose File", systemImage: "plus.circle.fill")
+                    HStack(spacing: 16) {
+                        Button {
+                            showPhotoPicker = true
+                        } label: {
+                            Label("Photos & Videos", systemImage: "photo.on.rectangle")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.orange)
+
+                        Button {
+                            showFilePicker = true
+                        } label: {
+                            Label("Files", systemImage: "folder")
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.orange)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.orange)
                 }
             } else {
                 List {
@@ -77,7 +90,7 @@ struct UploadView: View {
         }
         .fileImporter(
             isPresented: $showFilePicker,
-            allowedContentTypes: [.item],
+            allowedContentTypes: [.item, .image, .movie, .audio, .pdf, .data],
             allowsMultipleSelection: true
         ) { result in
             switch result {
@@ -88,6 +101,34 @@ struct UploadView: View {
             case .failure:
                 break
             }
+        }
+        .photosPicker(
+            isPresented: $showPhotoPicker,
+            selection: $selectedPhotos,
+            maxSelectionCount: 20,
+            matching: .any(of: [.images, .videos])
+        )
+        .onChange(of: selectedPhotos) { newItems in
+            Task {
+                for item in newItems {
+                    await handlePhotoPickerItem(item)
+                }
+                selectedPhotos = []
+            }
+        }
+    }
+
+    private func handlePhotoPickerItem(_ item: PhotosPickerItem) async {
+        // Get the file data from the photo picker item
+        if let movie = try? await item.loadTransferable(type: VideoTransferable.self) {
+            startUpload(url: movie.url)
+        } else if let data = try? await item.loadTransferable(type: Data.self) {
+            // Save to temp file
+            let ext = item.supportedContentTypes.first?.preferredFilenameExtension ?? "jpg"
+            let fileName = "photo_\(UUID().uuidString.prefix(8)).\(ext)"
+            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+            try? data.write(to: tempURL)
+            startUpload(url: tempURL)
         }
     }
 
@@ -192,4 +233,19 @@ struct UploadTask: Identifiable {
 
 enum UploadStatus {
     case pending, uploading, completed, failed
+}
+
+/// Transferable wrapper for video files from PhotosPicker
+struct VideoTransferable: Transferable {
+    let url: URL
+    static var transferRepresentation: some TransferRepresentation {
+        FileRepresentation(contentType: .movie) { video in
+            SentTransferredFile(video.url)
+        } importing: { received in
+            let tempURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent("video_\(UUID().uuidString.prefix(8)).\(received.file.pathExtension)")
+            try FileManager.default.copyItem(at: received.file, to: tempURL)
+            return Self(url: tempURL)
+        }
+    }
 }
