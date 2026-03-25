@@ -223,16 +223,16 @@ class MockDriveRepository: DriveRepository {
         return foldersResult
     }
 
-    func getFolderContents(options: [String: String]) async throws -> DriveContents {
+    func getFolderContents(fileOptions: [String: String], folderOptions: [String: String]) async throws -> DriveContents {
         getFolderContentsCalled += 1
-        lastFolderContentsOptions = options
+        lastFolderContentsOptions = fileOptions
         if let error = folderContentsError { throw error }
         return folderContentsResult
     }
 
-    func forceGetFolderContents(options: [String: String]) async throws -> DriveContents {
+    func forceGetFolderContents(fileOptions: [String: String], folderOptions: [String: String]) async throws -> DriveContents {
         forceGetFolderContentsCalled += 1
-        lastFolderContentsOptions = options
+        lastFolderContentsOptions = fileOptions
         if let error = folderContentsError { throw error }
         return folderContentsResult
     }

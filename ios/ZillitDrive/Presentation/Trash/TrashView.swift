@@ -24,8 +24,8 @@ struct TrashView: View {
                 List {
                     ForEach(items) { item in
                         HStack(spacing: 12) {
-                            Image(systemName: item.type == "folder" ? "folder.fill" : "doc")
-                                .foregroundColor(item.type == "folder" ? .orange : .blue)
+                            Image(systemName: item.itemType == "folder" ? "folder.fill" : "doc")
+                                .foregroundColor(item.itemType == "folder" ? .orange : .blue)
                                 .frame(width: 32)
 
                             VStack(alignment: .leading, spacing: 2) {
@@ -97,7 +97,7 @@ struct TrashView: View {
 
     private func restore(_ item: TrashItemDTO) async {
         do {
-            try await repository.restoreTrashItem(type: item.type, itemId: item.id)
+            try await repository.restoreTrashItem(type: item.itemType, itemId: item.id)
             await loadTrash()
         } catch {
             errorMessage = error.localizedDescription
@@ -106,7 +106,7 @@ struct TrashView: View {
 
     private func permanentDelete(_ item: TrashItemDTO) async {
         do {
-            try await repository.permanentDeleteTrashItem(type: item.type, itemId: item.id)
+            try await repository.permanentDeleteTrashItem(type: item.itemType, itemId: item.id)
             await loadTrash()
         } catch {
             errorMessage = error.localizedDescription

@@ -18,6 +18,8 @@ final class HomeViewModel: ObservableObject {
 
     private let repository: DriveRepository
     private let socketManager = DriveSocketManager()
+    private var loadTask: Task<Void, Never>?
+    private var loadId: UInt64 = 0
 
     init(repository: DriveRepository = DriveRepositoryImpl()) {
         self.repository = repository
@@ -31,26 +33,55 @@ final class HomeViewModel: ObservableObject {
     // MARK: - Load Contents
 
     func loadContents() async {
+        // Increment load ID — any in-flight request with an older ID is stale
+        loadId &+= 1
+        let myLoadId = loadId
+
         isLoading = true
         errorMessage = nil
 
+        let fileOpts = buildFileOptions()
+        let folderOpts = buildFolderOptions()
+        #if DEBUG
+        print("[loadContents] id=\(myLoadId) section=\(driveSection) folderId=\(currentFolderId ?? "root") fileOpts=\(fileOpts) folderOpts=\(folderOpts)")
+        #endif
+
         do {
-            // Load favorites in parallel (non-fatal if it fails)
             async let favIdsTask = try? repository.getFavoriteIds()
-            let contentsResult = try await repository.getFolderContents(options: buildOptions())
+            let contentsResult = try await repository.getFolderContents(
+                fileOptions: fileOpts, folderOptions: folderOpts
+            )
+
+            // Stale check — if another load started while we were waiting, discard
+            guard myLoadId == loadId else {
+                #if DEBUG
+                print("[loadContents] id=\(myLoadId) DISCARDED (current=\(loadId))")
+                #endif
+                return
+            }
 
             if let favResult = await favIdsTask {
                 favoriteFileIds = Set(favResult.fileIds ?? [])
                 favoriteFolderIds = Set(favResult.folderIds ?? [])
             }
 
-            // Apply favorite flags to items
-            let folders: [DriveItem] = contentsResult.folders.map { folder in
+            // Client-side filtering (matches web's combinedData useMemo)
+            let filteredFolders: [DriveFolder]
+            let filteredFiles: [DriveFile]
+            if let folderId = currentFolderId {
+                filteredFolders = contentsResult.folders.filter { $0.parentFolderId == folderId }
+                filteredFiles = contentsResult.files.filter { $0.folderId == folderId }
+            } else {
+                filteredFolders = contentsResult.folders.filter { $0.parentFolderId == nil || $0.parentFolderId?.isEmpty == true }
+                filteredFiles = contentsResult.files.filter { $0.folderId == nil || $0.folderId?.isEmpty == true }
+            }
+
+            let folders: [DriveItem] = filteredFolders.map { folder in
                 var f = folder
                 f.isFavorite = favoriteFolderIds.contains(f.id)
                 return .folder(f)
             }
-            let files: [DriveItem] = contentsResult.files.map { file in
+            let files: [DriveItem] = filteredFiles.map { file in
                 var f = file
                 f.isFavorite = favoriteFileIds.contains(f.id)
                 return .file(f)
@@ -60,11 +91,34 @@ final class HomeViewModel: ObservableObject {
             allItems = sortItems(allItems)
             isLoading = false
             items = allItems
+            #if DEBUG
+            print("[loadContents] id=\(myLoadId) DONE — \(allItems.count) items")
+            #endif
+
+            // Load thumbnail preview URLs for image/video files in background
+            Task { [weak self] in
+                guard let self else { return }
+                for (index, item) in allItems.enumerated() {
+                    guard myLoadId == self.loadId else { return }
+                    if case .file(let file) = item,
+                       (FileUtils.isImage(file.fileExtension) || FileUtils.isVideo(file.fileExtension)) {
+                        if let url = try? await self.repository.getFilePreviewUrl(fileId: file.id) {
+                            // Update the item in place
+                            if myLoadId == self.loadId, index < self.items.count,
+                               case .file(var f) = self.items[index], f.id == file.id {
+                                f.previewUrl = url
+                                self.items[index] = .file(f)
+                            }
+                        }
+                    }
+                }
+            }
         } catch {
+            guard myLoadId == loadId else { return }
             isLoading = false
             errorMessage = error.localizedDescription
             #if DEBUG
-            print("🔴 loadContents error: \(error)")
+            print("🔴 loadContents id=\(myLoadId) error: \(error)")
             #endif
         }
     }
@@ -76,19 +130,32 @@ final class HomeViewModel: ObservableObject {
 
         do {
             async let favIdsTask = try? repository.getFavoriteIds()
-            let contentsResult = try await repository.forceGetFolderContents(options: buildOptions())
+            let contentsResult = try await repository.forceGetFolderContents(
+                fileOptions: buildFileOptions(), folderOptions: buildFolderOptions()
+            )
 
             if let favResult = await favIdsTask {
                 favoriteFileIds = Set(favResult.fileIds ?? [])
                 favoriteFolderIds = Set(favResult.folderIds ?? [])
             }
 
-            let folders: [DriveItem] = contentsResult.folders.map { folder in
+            // Client-side filtering (same as loadContents)
+            let filteredFolders: [DriveFolder]
+            let filteredFiles: [DriveFile]
+            if let folderId = currentFolderId {
+                filteredFolders = contentsResult.folders.filter { $0.parentFolderId == folderId }
+                filteredFiles = contentsResult.files.filter { $0.folderId == folderId }
+            } else {
+                filteredFolders = contentsResult.folders.filter { $0.parentFolderId == nil || $0.parentFolderId?.isEmpty == true }
+                filteredFiles = contentsResult.files.filter { $0.folderId == nil || $0.folderId?.isEmpty == true }
+            }
+
+            let folders: [DriveItem] = filteredFolders.map { folder in
                 var f = folder
                 f.isFavorite = favoriteFolderIds.contains(f.id)
                 return .folder(f)
             }
-            let files: [DriveItem] = contentsResult.files.map { file in
+            let files: [DriveItem] = filteredFiles.map { file in
                 var f = file
                 f.isFavorite = favoriteFileIds.contains(f.id)
                 return .file(f)
@@ -107,21 +174,27 @@ final class HomeViewModel: ObservableObject {
     // MARK: - Navigation
 
     func navigateToFolder(_ folder: DriveFolder) {
+        loadTask?.cancel()
+        items = []
         breadcrumbs.append(BreadcrumbItem(id: folder.id, name: folder.folderName))
         markFolderRead(folder.id)
-        Task { await loadContents() }
+        loadTask = Task { await loadContents() }
     }
 
     func navigateToBreadcrumb(_ crumb: BreadcrumbItem) {
         guard let index = breadcrumbs.firstIndex(where: { $0.id == crumb.id && $0.name == crumb.name }) else { return }
+        loadTask?.cancel()
+        items = []
         breadcrumbs = Array(breadcrumbs.prefix(through: index))
-        Task { await loadContents() }
+        loadTask = Task { await loadContents() }
     }
 
     func navigateBack() -> Bool {
         guard breadcrumbs.count > 1 else { return false }
+        loadTask?.cancel()
+        items = []
         breadcrumbs.removeLast()
-        Task { await loadContents() }
+        loadTask = Task { await loadContents() }
         return true
     }
 
@@ -264,14 +337,27 @@ final class HomeViewModel: ObservableObject {
 
     // MARK: - Private
 
-    private func buildOptions() -> [String: String] {
+    /// Options for /files endpoint (uses folder_id)
+    private func buildFileOptions() -> [String: String] {
         var options: [String: String] = [:]
         if let folderId = currentFolderId {
             options["folder_id"] = folderId
         } else {
-            options["root"] = "true"
-            // Apply section filter only at root (matches web behavior)
-            options["quick_filter"] = driveSection.quickFilter
+            // My Drive: only user's own items. Shared: only items shared by others.
+            options["quick_filter"] = driveSection == .sharedWithMe ? "shared" : "mine"
+        }
+        options["sort_by"] = sortBy.apiValue
+        options["sort_order"] = "asc"
+        return options
+    }
+
+    /// Options for /folders endpoint (uses parent_folder_id — NOT folder_id)
+    private func buildFolderOptions() -> [String: String] {
+        var options: [String: String] = [:]
+        if let folderId = currentFolderId {
+            options["parent_folder_id"] = folderId
+        } else {
+            options["quick_filter"] = driveSection == .sharedWithMe ? "shared" : "mine"
         }
         options["sort_by"] = sortBy.apiValue
         options["sort_order"] = "asc"
@@ -279,10 +365,12 @@ final class HomeViewModel: ObservableObject {
     }
 
     func switchSection(_ section: DriveSection) {
-        guard section != driveSection else { return }
-        driveSection = section
+        // Note: Picker binding already sets driveSection before this is called,
+        // so we just clear state and reload — no guard needed
+        loadTask?.cancel()
+        items = []
         breadcrumbs = [BreadcrumbItem(id: nil, name: section.displayName)]
-        Task { await loadContents() }
+        loadTask = Task { await loadContents() }
     }
 
     // MARK: - Socket.IO Real-Time Events

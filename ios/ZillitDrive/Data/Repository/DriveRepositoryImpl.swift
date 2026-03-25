@@ -153,22 +153,37 @@ final class DriveRepositoryImpl: DriveRepository {
         return dtos.map { DriveMapper.toDomain($0) }
     }
 
-    func getFolderContents(options: [String: String]) async throws -> DriveContents {
-        let key = contentsCacheKey(from: options)
+    func getFolderContents(fileOptions: [String: String], folderOptions: [String: String]) async throws -> DriveContents {
+        let key = contentsCacheKey(from: fileOptions)
         if let cached = await cache.getCachedContents(forKey: key) {
             return cached
         }
-        let dto = try await DriveEndpoints.getFolderContents(options: options)
-        let contents = DriveMapper.toDomain(dto)
-        await cache.setCachedContents(contents, forKey: key)
-        return contents
+        return try await fetchContentsFromSeparateEndpoints(fileOptions: fileOptions, folderOptions: folderOptions, cacheKey: key)
     }
 
-    func forceGetFolderContents(options: [String: String]) async throws -> DriveContents {
-        let key = contentsCacheKey(from: options)
-        let dto = try await DriveEndpoints.getFolderContents(options: options)
-        let contents = DriveMapper.toDomain(dto)
-        await cache.setCachedContents(contents, forKey: key)
+    func forceGetFolderContents(fileOptions: [String: String], folderOptions: [String: String]) async throws -> DriveContents {
+        let key = contentsCacheKey(from: fileOptions)
+        return try await fetchContentsFromSeparateEndpoints(fileOptions: fileOptions, folderOptions: folderOptions, cacheKey: key)
+    }
+
+    /// Fetches files + folders from separate endpoints
+    /// Web: /files?folder_id=xxx + /folders?parent_folder_id=xxx (different param names!)
+    private func fetchContentsFromSeparateEndpoints(fileOptions: [String: String], folderOptions: [String: String], cacheKey: String) async throws -> DriveContents {
+        async let filesTask = DriveEndpoints.getFiles(options: fileOptions)
+        async let foldersTask = DriveEndpoints.getFolders(options: folderOptions)
+
+        let (fileDTOs, folderDTOs) = try await (filesTask, foldersTask)
+
+        let files = fileDTOs.map { DriveMapper.toDomain($0) }
+        let folders = folderDTOs.map { DriveMapper.toDomain($0) }
+
+        let contents = DriveContents(
+            folders: folders,
+            files: files,
+            totalFolders: folders.count,
+            totalFiles: files.count
+        )
+        await cache.setCachedContents(contents, forKey: cacheKey)
         return contents
     }
 
@@ -223,8 +238,7 @@ final class DriveRepositoryImpl: DriveRepository {
     // MARK: - Trash
 
     func getTrash() async throws -> [TrashItemDTO] {
-        let response = try await DriveEndpoints.getTrash()
-        return response.data ?? []
+        try await DriveEndpoints.getTrash()
     }
 
     func restoreTrashItem(type: String, itemId: String) async throws {

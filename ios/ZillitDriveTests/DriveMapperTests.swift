@@ -434,14 +434,16 @@ final class DriveMapperTests: XCTestCase {
             deletedOn: 1700000000, attachments: nil
         )
         let trashItem = TrashItemDTO(
-            id: "trash1", type: "file", name: "deleted.pdf",
-            deletedOn: 1700000000, file: fileDTO, folder: nil
+            id: "trash1", itemType: "file", name: "deleted.pdf",
+            deletedOn: 1700000000, fileName: "deleted.pdf", fileExtension: "pdf",
+            fileSizeBytes: 1024, mimeType: "application/pdf", folderId: nil,
+            folderName: nil, parentFolderId: nil, createdBy: "user1", createdOn: 0
         )
 
         let item = DriveMapper.toDomain(trashItem)
 
         if case .file(let file) = item {
-            XCTAssertEqual(file.id, "f1")
+            XCTAssertEqual(file.id, "trash1")
             XCTAssertEqual(file.fileName, "deleted.pdf")
         } else {
             XCTFail("Expected file item from trash")
@@ -455,14 +457,16 @@ final class DriveMapperTests: XCTestCase {
             updatedOn: 0, deletedOn: 1700000000, fileCount: 0, folderCount: 0
         )
         let trashItem = TrashItemDTO(
-            id: "trash2", type: "folder", name: "Old Folder",
-            deletedOn: 1700000000, file: nil, folder: folderDTO
+            id: "trash2", itemType: "folder", name: "Old Folder",
+            deletedOn: 1700000000, fileName: nil, fileExtension: nil,
+            fileSizeBytes: nil, mimeType: nil, folderId: nil,
+            folderName: "Old Folder", parentFolderId: nil, createdBy: "user1", createdOn: 0
         )
 
         let item = DriveMapper.toDomain(trashItem)
 
         if case .folder(let folder) = item {
-            XCTAssertEqual(folder.id, "d1")
+            XCTAssertEqual(folder.id, "trash2")
             XCTAssertEqual(folder.folderName, "Old Folder")
         } else {
             XCTFail("Expected folder item from trash")
@@ -472,8 +476,10 @@ final class DriveMapperTests: XCTestCase {
     func testTrashMapping_fallback() {
         // When neither file nor folder DTO is present
         let trashItem = TrashItemDTO(
-            id: "trash3", type: "unknown", name: "Mystery",
-            deletedOn: 1700000000, file: nil, folder: nil
+            id: "trash3", itemType: "unknown", name: "Mystery",
+            deletedOn: 1700000000, fileName: nil, fileExtension: nil,
+            fileSizeBytes: nil, mimeType: nil, folderId: nil,
+            folderName: nil, parentFolderId: nil, createdBy: nil, createdOn: nil
         )
 
         let item = DriveMapper.toDomain(trashItem)

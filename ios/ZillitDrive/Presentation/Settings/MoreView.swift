@@ -212,11 +212,9 @@ struct MoreView: View {
     }
 
     private func loadTeamMembers() async {
-        do {
-            teamMembers = try await repository.getFolderAccess(folderId: "root")
-        } catch {
-            // Silently handle - team members section won't show
-        }
+        // Team members feature requires a valid folder ID
+        // Skip if no folders are available — this avoids the "root" ObjectId error
+        teamMembers = []
     }
 }
 

@@ -14,8 +14,8 @@ protocol DriveRepository {
 
     // Folders
     func getFolders(options: [String: String]) async throws -> [DriveFolder]
-    func getFolderContents(options: [String: String]) async throws -> DriveContents
-    func forceGetFolderContents(options: [String: String]) async throws -> DriveContents
+    func getFolderContents(fileOptions: [String: String], folderOptions: [String: String]) async throws -> DriveContents
+    func forceGetFolderContents(fileOptions: [String: String], folderOptions: [String: String]) async throws -> DriveContents
     func createFolder(data: [String: Any]) async throws -> DriveFolder
     func updateFolder(folderId: String, data: [String: Any]) async throws -> DriveFolder
     func deleteFolder(folderId: String) async throws

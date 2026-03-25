@@ -1,4 +1,5 @@
 import SwiftUI
+import Kingfisher
 
 struct DriveItemRow: View {
     let item: DriveItem
@@ -122,9 +123,22 @@ struct DriveItemRow: View {
                 .font(.title3)
                 .foregroundColor(.orange)
         case .file(let file):
-            Image(systemName: iconName(for: file.fileExtension))
-                .font(.title3)
-                .foregroundColor(FileUtils.extensionColor(for: file.fileExtension))
+            if let previewUrl = file.previewUrl, !previewUrl.isEmpty,
+               (FileUtils.isImage(file.fileExtension) || FileUtils.isVideo(file.fileExtension)) {
+                KFImage(URL(string: previewUrl))
+                    .placeholder {
+                        Image(systemName: iconName(for: file.fileExtension))
+                            .font(.title3)
+                            .foregroundColor(FileUtils.extensionColor(for: file.fileExtension))
+                    }
+                    .resizable()
+                    .scaledToFill()
+                    .clipped()
+            } else {
+                Image(systemName: iconName(for: file.fileExtension))
+                    .font(.title3)
+                    .foregroundColor(FileUtils.extensionColor(for: file.fileExtension))
+            }
         }
     }
 
@@ -138,7 +152,11 @@ struct DriveItemRow: View {
     private var subtitle: String {
         switch item {
         case .folder(let folder):
-            return "\(folder.fileCount) files, \(folder.folderCount) folders"
+            let parts = [
+                folder.fileCount > 0 ? "\(folder.fileCount) file\(folder.fileCount == 1 ? "" : "s")" : nil,
+                folder.folderCount > 0 ? "\(folder.folderCount) folder\(folder.folderCount == 1 ? "" : "s")" : nil,
+            ].compactMap { $0 }
+            return parts.isEmpty ? "Folder" : parts.joined(separator: ", ")
         case .file(let file):
             return "\(FileUtils.formatFileSize(file.fileSizeBytes)) · \(file.fileExtension.uppercased())"
         }
@@ -165,87 +183,145 @@ struct DriveItemGridCell: View {
     var hasUnreadBadge: Bool = false
     var onTap: () -> Void = {}
 
+    private var hasThumbnail: Bool {
+        if case .file(let file) = item,
+           let url = file.previewUrl, !url.isEmpty,
+           (FileUtils.isImage(file.fileExtension) || FileUtils.isVideo(file.fileExtension)) {
+            return true
+        }
+        return false
+    }
+
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: 8) {
+            VStack(spacing: 0) {
+                // Thumbnail / Icon area
                 ZStack(alignment: .topTrailing) {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(backgroundColor)
-                        .frame(height: 100)
-                        .overlay {
-                            icon
-                        }
+                    thumbnailView
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 120)
+                        .clipped()
 
-                    // Top-right badges
-                    VStack(spacing: 4) {
+                    // Badges overlay
+                    HStack(spacing: 4) {
                         if isFavorite {
                             Image(systemName: "star.fill")
-                                .font(.caption)
-                                .foregroundColor(.orange)
+                                .font(.system(size: 10))
+                                .foregroundColor(.white)
+                                .padding(4)
+                                .background(Circle().fill(Color.orange))
                         }
                         if badgeCount > 0 {
                             Text("\(badgeCount)")
-                                .font(.caption2).bold()
+                                .font(.system(size: 10, weight: .bold))
                                 .foregroundColor(.white)
-                                .padding(.horizontal, 5)
-                                .padding(.vertical, 1)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
                                 .background(Capsule().fill(Color.orange))
                         } else if hasUnreadBadge {
-                            Circle()
-                                .fill(Color.orange)
-                                .frame(width: 8, height: 8)
+                            Circle().fill(Color.orange).frame(width: 8, height: 8)
                         }
                     }
                     .padding(6)
                 }
 
-                HStack(spacing: 4) {
+                // File info bar
+                HStack(spacing: 6) {
+                    // Small type icon
+                    Image(systemName: smallIconName)
+                        .font(.system(size: 12))
+                        .foregroundColor(iconColor)
+
                     Text(item.name)
-                        .font(.caption)
+                        .font(.system(size: 12, weight: .medium))
                         .foregroundColor(.primary)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.center)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+
+                    Spacer(minLength: 0)
 
                     // Shared indicator
                     if let uid = currentUserId, !item.createdBy.isEmpty, item.createdBy != uid {
                         Image(systemName: "person.2.fill")
-                            .font(.system(size: 8))
+                            .font(.system(size: 9))
                             .foregroundColor(.blue)
                     }
                 }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 8)
+                .background(Color(.systemBackground))
             }
+            .background(Color(.secondarySystemBackground))
+            .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(isDropTarget ? Color.orange : Color.clear, lineWidth: 2)
+                    .stroke(isDropTarget ? Color.orange : Color(.separator).opacity(0.3), lineWidth: isDropTarget ? 2 : 0.5)
             )
+            .shadow(color: Color.black.opacity(0.06), radius: 3, x: 0, y: 1)
             .animation(.easeInOut(duration: 0.2), value: isDropTarget)
         }
         .buttonStyle(.plain)
     }
 
     @ViewBuilder
-    private var icon: some View {
+    private var thumbnailView: some View {
         switch item {
         case .folder:
-            Image(systemName: "folder.fill")
-                .font(.largeTitle)
-                .foregroundColor(.orange)
+            ZStack {
+                Color.orange.opacity(0.08)
+                Image(systemName: "folder.fill")
+                    .font(.system(size: 36))
+                    .foregroundColor(.orange)
+            }
         case .file(let file):
-            VStack(spacing: 4) {
-                Image(systemName: gridIconName(for: file.fileExtension))
-                    .font(.title)
-                    .foregroundColor(FileUtils.extensionColor(for: file.fileExtension))
-                Text(file.fileExtension.uppercased())
-                    .font(.caption2.bold())
-                    .foregroundColor(.secondary)
+            if let previewUrl = file.previewUrl, !previewUrl.isEmpty,
+               (FileUtils.isImage(file.fileExtension) || FileUtils.isVideo(file.fileExtension)) {
+                KFImage(URL(string: previewUrl))
+                    .placeholder {
+                        ZStack {
+                            Color(.secondarySystemBackground)
+                            ProgressView()
+                        }
+                    }
+                    .resizable()
+                    .scaledToFill()
+                    .frame(maxWidth: .infinity, maxHeight: 120)
+                    .clipped()
+                    .overlay {
+                        if FileUtils.isVideo(file.fileExtension) {
+                            // Play button overlay for videos
+                            Image(systemName: "play.circle.fill")
+                                .font(.system(size: 28))
+                                .foregroundStyle(.white, .black.opacity(0.4))
+                        }
+                    }
+            } else {
+                ZStack {
+                    FileUtils.extensionColor(for: file.fileExtension).opacity(0.08)
+                    VStack(spacing: 4) {
+                        Image(systemName: gridIconName(for: file.fileExtension))
+                            .font(.system(size: 28))
+                            .foregroundColor(FileUtils.extensionColor(for: file.fileExtension))
+                        Text(file.fileExtension.uppercased())
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(.secondary)
+                    }
+                }
             }
         }
     }
 
-    private var backgroundColor: Color {
+    private var smallIconName: String {
         switch item {
-        case .folder: return Color.orange.opacity(0.08)
-        case .file(let file): return FileUtils.extensionColor(for: file.fileExtension).opacity(0.08)
+        case .folder: return "folder.fill"
+        case .file(let file): return gridIconName(for: file.fileExtension)
+        }
+    }
+
+    private var iconColor: Color {
+        switch item {
+        case .folder: return .orange
+        case .file(let file): return FileUtils.extensionColor(for: file.fileExtension)
         }
     }
 

@@ -147,8 +147,9 @@ enum DriveEndpoints {
 
     // MARK: - Trash
 
-    static func getTrash() async throws -> APIResponse<[TrashItemDTO]> {
-        try await api.request(endpoint: "trash")
+    static func getTrash() async throws -> [TrashItemDTO] {
+        let response: APIResponse<TrashListDTO> = try await api.request(endpoint: "trash")
+        return response.data?.items ?? []
     }
 
     static func restoreTrashItem(type: String, itemId: String) async throws {
@@ -179,9 +180,11 @@ enum DriveEndpoints {
     }
 
     static func getFavoriteIds() async throws -> FavoriteIdsDTO {
-        let response: APIResponse<FavoriteIdsDTO> = try await api.request(endpoint: "favorites/ids")
-        guard let data = response.data else { throw APIError.invalidResponse }
-        return data
+        // Backend returns flat array of item IDs: "data": ["id1", "id2"]
+        // We parse it into FavoriteIdsDTO (all IDs in one list, type unknown at this level)
+        let response: APIResponse<[String]> = try await api.request(endpoint: "favorites/ids")
+        let allIds = response.data ?? []
+        return FavoriteIdsDTO(fileIds: allIds, folderIds: allIds)
     }
 
     // MARK: - Tags
@@ -215,10 +218,11 @@ enum DriveEndpoints {
     // MARK: - Comments
 
     static func getComments(fileId: String) async throws -> [DriveCommentDTO] {
-        let response: APIResponse<[DriveCommentDTO]> = try await api.request(
+        // Backend returns { comments: [...], total, limit, offset }
+        let response: APIResponse<CommentsListDTO> = try await api.request(
             endpoint: "comments", queryParams: ["file_id": fileId]
         )
-        return response.data ?? []
+        return response.data?.comments ?? []
     }
 
     static func addComment(fileId: String, text: String) async throws -> DriveCommentDTO {
@@ -271,10 +275,11 @@ enum DriveEndpoints {
     // MARK: - Activity
 
     static func getActivity(options: [String: String] = [:]) async throws -> [DriveActivityDTO] {
-        let response: APIResponse<[DriveActivityDTO]> = try await api.request(
+        // Backend returns { items: [...], total, limit, offset }
+        let response: APIResponse<ActivityListDTO> = try await api.request(
             endpoint: "activity", queryParams: options
         )
-        return response.data ?? []
+        return response.data?.items ?? []
     }
 
     // MARK: - Storage
@@ -319,7 +324,17 @@ enum DriveEndpoints {
 
     // MARK: - Editor
 
-    /// Get a page token for opening the OnlyOffice editor in a WebView
+    /// Get editor config — same as web: GET /editor/{fileId}/config?mode=view|edit
+    /// Returns Collabora WOPI URL, access token, editor URL
+    static func getEditorConfig(fileId: String, mode: String = "edit") async throws -> EditorConfigDTO {
+        let response: APIResponse<EditorConfigDTO> = try await api.request(
+            endpoint: "editor/\(fileId)/config", queryParams: ["mode": mode]
+        )
+        guard let data = response.data else { throw APIError.invalidResponse }
+        return data
+    }
+
+    /// Get a page token for opening the OnlyOffice editor in a WebView (fallback)
     static func getEditorPageToken(fileId: String) async throws -> String {
         let response: APIResponse<EditorPageTokenDTO> = try await api.request(
             endpoint: "editor/\(fileId)/page-token"
@@ -333,22 +348,76 @@ enum DriveEndpoints {
 
 struct EmptyResponse: Codable {}
 
+struct EditorConfigDTO: Codable {
+    let collaboraUrl: String?
+    let editorUrl: String?
+    let wopiSrc: String?
+    let accessToken: String?
+    let accessTokenTTL: Int64?
+    let fileName: String?
+    let fileType: String?
+    let pageUrl: String?
+    // No CodingKeys needed — backend returns camelCase which matches Swift property names
+    // except accessTokenTTL which needs explicit mapping
+    enum CodingKeys: String, CodingKey {
+        case collaboraUrl, editorUrl, wopiSrc, accessToken
+        case accessTokenTTL = "accessTokenTTL"
+        case fileName, fileType, pageUrl
+    }
+}
+
 struct EditorPageTokenDTO: Codable {
     let token: String
 }
 
+struct TrashListDTO: Codable {
+    let items: [TrashItemDTO]?
+}
+
+struct CommentsListDTO: Codable {
+    let comments: [DriveCommentDTO]?
+}
+
+struct ActivityListDTO: Codable {
+    let items: [DriveActivityDTO]?
+}
+
+/// Trash items are flat objects — the full file/folder data with `item_type` and `name` added.
+/// No nested `file`/`folder` sub-objects.
 struct TrashItemDTO: Codable, Identifiable {
     let id: String
-    let type: String
+    let itemType: String      // "file" or "folder"
     let name: String?
     let deletedOn: Int64?
-    let file: DriveFileDTO?
-    let folder: DriveFolderDTO?
+
+    // File fields (present when item_type == "file")
+    let fileName: String?
+    let fileExtension: String?
+    let fileSizeBytes: Int64?
+    let mimeType: String?
+    let folderId: String?
+
+    // Folder fields (present when item_type == "folder")
+    let folderName: String?
+    let parentFolderId: String?
+
+    // Common
+    let createdBy: String?
+    let createdOn: Int64?
 
     enum CodingKeys: String, CodingKey {
         case id = "_id"
-        case type, name
+        case itemType = "item_type"
+        case name
         case deletedOn = "deleted_on"
-        case file, folder
+        case fileName = "file_name"
+        case fileExtension = "file_extension"
+        case fileSizeBytes = "file_size_bytes"
+        case mimeType = "mime_type"
+        case folderId = "folder_id"
+        case folderName = "folder_name"
+        case parentFolderId = "parent_folder_id"
+        case createdBy = "created_by"
+        case createdOn = "created_on"
     }
 }

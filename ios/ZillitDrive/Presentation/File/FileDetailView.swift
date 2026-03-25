@@ -15,6 +15,7 @@ struct FileDetailView: View {
     @State private var previewURL: URL?
     @State private var selectedTab = 0
     @State private var showEditor = false
+    @State private var editorMode = "edit"
     private let repository: DriveRepository = DriveRepositoryImpl()
 
     var body: some View {
@@ -58,10 +59,13 @@ struct FileDetailView: View {
 
                     if FileUtils.isEditable(file.fileExtension) {
                         actionButton(icon: "pencil.circle", title: "Edit") {
+                            editorMode = "edit"
                             showEditor = true
                         }
-                    } else if FileUtils.isOffice(file.fileExtension) || FileUtils.isPDF(file.fileExtension) {
-                        actionButton(icon: "doc.viewfinder", title: "Open in Editor") {
+                    }
+                    if FileUtils.isOffice(file.fileExtension) || FileUtils.isPDF(file.fileExtension) {
+                        actionButton(icon: "doc.viewfinder", title: "Preview") {
+                            editorMode = "view"
                             showEditor = true
                         }
                     }
@@ -114,7 +118,7 @@ struct FileDetailView: View {
         }
         .quickLookPreview($previewURL)
         .fullScreenCover(isPresented: $showEditor) {
-            OnlyOfficeEditorView(fileId: file.id, fileName: file.fileName)
+            OnlyOfficeEditorView(fileId: file.id, fileName: file.fileName, mode: editorMode)
         }
     }
 

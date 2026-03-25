@@ -9,6 +9,27 @@ struct APIResponse<T: Decodable>: Decodable {
     let data: T?
 
     var isSuccess: Bool { status == 1 }
+
+    /// Backend inconsistency: some controllers return `{ status: true }` (boolean)
+    /// while others return `{ status: 1 }` (int). Handle both.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        // Try Int first, then Bool → map true=1, false=0
+        if let intStatus = try? container.decode(Int.self, forKey: .status) {
+            status = intStatus
+        } else if let boolStatus = try? container.decode(Bool.self, forKey: .status) {
+            status = boolStatus ? 1 : 0
+        } else {
+            status = 0
+        }
+        message = try? container.decode(String.self, forKey: .message)
+        messageElements = try? container.decode([String].self, forKey: .messageElements)
+        data = try? container.decode(T.self, forKey: .data)
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case status, message, messageElements, data
+    }
 }
 
 // MARK: - Permissions DTO
@@ -364,23 +385,9 @@ struct FavoriteIdsDTO: Codable {
     let fileIds: [String]?
     let folderIds: [String]?
 
-    enum CodingKeys: String, CodingKey {
-        case fileIds = "file_ids"
-        case folderIds = "folder_ids"
-    }
-
-    /// Backend returns `[]` (empty array) when no favorites exist,
-    /// but returns `{ file_ids: [...], folder_ids: [...] }` when there are favorites.
-    /// Handle both cases.
-    init(from decoder: Decoder) throws {
-        // First try decoding as a dictionary (normal case)
-        if let container = try? decoder.container(keyedBy: CodingKeys.self) {
-            fileIds = try? container.decode([String].self, forKey: .fileIds)
-            folderIds = try? container.decode([String].self, forKey: .folderIds)
-        } else {
-            // Backend returned [] or some other non-dict — treat as empty
-            fileIds = []
-            folderIds = []
-        }
+    /// Direct init for constructing from parsed data
+    init(fileIds: [String]?, folderIds: [String]?) {
+        self.fileIds = fileIds
+        self.folderIds = folderIds
     }
 }

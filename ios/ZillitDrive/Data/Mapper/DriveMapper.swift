@@ -179,17 +179,31 @@ enum DriveMapper {
     // MARK: - Trash
 
     static func toDomain(_ dto: TrashItemDTO) -> DriveItem {
-        if dto.type == "folder", let folder = dto.folder {
-            return .folder(toDomain(folder))
-        } else if let file = dto.file {
-            return .file(toDomain(file))
+        if dto.itemType == "folder" {
+            return .folder(DriveFolder(
+                id: dto.id,
+                folderName: dto.folderName ?? dto.name ?? "Untitled",
+                parentFolderId: dto.parentFolderId,
+                description: nil,
+                createdBy: dto.createdBy ?? "",
+                createdOn: dto.createdOn ?? 0,
+                updatedOn: 0,
+                fileCount: 0,
+                folderCount: 0
+            ))
         }
-        // Fallback: create a minimal file item
         return .file(DriveFile(
-            id: dto.id, fileName: dto.name ?? "Unknown",
-            fileExtension: "", fileSizeBytes: 0, mimeType: "",
-            folderId: nil, filePath: nil, description: nil,
-            createdBy: "", createdOn: dto.deletedOn ?? 0, updatedOn: 0,
+            id: dto.id,
+            fileName: dto.fileName ?? dto.name ?? "Untitled",
+            fileExtension: dto.fileExtension ?? "",
+            fileSizeBytes: dto.fileSizeBytes ?? 0,
+            mimeType: dto.mimeType ?? "",
+            folderId: dto.folderId,
+            filePath: nil,
+            description: nil,
+            createdBy: dto.createdBy ?? "",
+            createdOn: dto.createdOn ?? 0,
+            updatedOn: 0,
             thumbnailUrl: nil
         ))
     }

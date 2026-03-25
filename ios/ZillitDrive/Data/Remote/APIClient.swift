@@ -42,13 +42,16 @@ final class APIClient {
 
         // Execute request
         #if DEBUG
-        print("[API] \(method.rawValue) \(url.absoluteString)")
-        if let md = request.value(forHTTPHeaderField: "moduledata") {
-            print("[API] moduledata: \(String(md.prefix(80)))...")
+        // Print full curl command for debugging
+        var curlParts = ["curl '\(url.absoluteString)'"]
+        if method != .get { curlParts.append("-X \(method.rawValue)") }
+        for (key, value) in request.allHTTPHeaderFields ?? [:] {
+            curlParts.append("-H '\(key): \(value)'")
         }
-        if let bh = request.value(forHTTPHeaderField: "bodyhash") {
-            print("[API] bodyhash: \(bh)")
+        if let body = request.httpBody, let bodyStr = String(data: body, encoding: .utf8) {
+            curlParts.append("-d '\(bodyStr)'")
         }
+        print("[CURL] \(curlParts.joined(separator: " \\\n  "))")
         #endif
         let (data, response) = try await session.data(for: request)
 
@@ -58,8 +61,8 @@ final class APIClient {
 
         #if DEBUG
         print("[API] \(method.rawValue) \(url.path) → \(httpResponse.statusCode) (\(data.count) bytes)")
-        if httpResponse.statusCode >= 400, let body = String(data: data, encoding: .utf8) {
-            print("[API] Error body: \(String(body.prefix(500)))")
+        if let body = String(data: data, encoding: .utf8) {
+            print("[RESPONSE] \(String(body.prefix(1000)))")
         }
         #endif
 

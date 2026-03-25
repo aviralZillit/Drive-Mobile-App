@@ -50,8 +50,8 @@ final class DriveRepositoryImplTests: XCTestCase {
 
         let options = ["root": "true", "sort_by": "name"]
 
-        let result1 = try await mockRepo.getFolderContents(options: options)
-        let result2 = try await mockRepo.getFolderContents(options: options)
+        let result1 = try await mockRepo.getFolderContents(fileOptions: ["root": "true"], folderOptions: options)
+        let result2 = try await mockRepo.getFolderContents(fileOptions: ["root": "true"], folderOptions: options)
 
         // Both calls should succeed and return the same result
         XCTAssertEqual(result1.files.count, 1)
@@ -69,9 +69,9 @@ final class DriveRepositoryImplTests: XCTestCase {
         let options = ["root": "true"]
 
         // First call: normal load (uses cache)
-        _ = try await mockRepo.getFolderContents(options: options)
+        _ = try await mockRepo.getFolderContents(fileOptions: ["root": "true"], folderOptions: options)
         // Second call: force load (bypasses cache)
-        _ = try await mockRepo.forceGetFolderContents(options: options)
+        _ = try await mockRepo.forceGetFolderContents(fileOptions: ["root": "true"], folderOptions: options)
 
         XCTAssertEqual(mockRepo.getFolderContentsCalled, 1)
         XCTAssertEqual(mockRepo.forceGetFolderContentsCalled, 1)
@@ -82,7 +82,7 @@ final class DriveRepositoryImplTests: XCTestCase {
         mockRepo.folderContentsResult = DriveContents(
             folders: [], files: [makeSampleFile()], totalFolders: 0, totalFiles: 1
         )
-        _ = try await mockRepo.getFolderContents(options: ["root": "true"])
+        _ = try await mockRepo.getFolderContents(fileOptions: ["root": "true"], folderOptions: ["root": "true"])
 
         // Delete a file
         try await mockRepo.deleteFile(fileId: "f1")
@@ -92,13 +92,13 @@ final class DriveRepositoryImplTests: XCTestCase {
 
         // In the real impl, deleteFile calls cache.invalidateContents(folderId: nil)
         // Verify the delete happened and the next load would fetch fresh data
-        _ = try await mockRepo.getFolderContents(options: ["root": "true"])
+        _ = try await mockRepo.getFolderContents(fileOptions: ["root": "true"], folderOptions: ["root": "true"])
         XCTAssertEqual(mockRepo.getFolderContentsCalled, 2)
     }
 
     func testCreateFolder_invalidatesCache() async throws {
         // Load contents first
-        _ = try await mockRepo.getFolderContents(options: ["root": "true"])
+        _ = try await mockRepo.getFolderContents(fileOptions: ["root": "true"], folderOptions: ["root": "true"])
 
         // Create a folder
         _ = try await mockRepo.createFolder(data: ["folder_name": "New Folder"])
@@ -107,7 +107,7 @@ final class DriveRepositoryImplTests: XCTestCase {
         XCTAssertEqual(mockRepo.lastCreateFolderData?["folder_name"] as? String, "New Folder")
 
         // After creation, cache should be invalidated and next call fetches fresh
-        _ = try await mockRepo.getFolderContents(options: ["root": "true"])
+        _ = try await mockRepo.getFolderContents(fileOptions: ["root": "true"], folderOptions: ["root": "true"])
         XCTAssertEqual(mockRepo.getFolderContentsCalled, 2)
     }
 
@@ -162,8 +162,8 @@ final class DriveRepositoryImplTests: XCTestCase {
             folders: [], files: [], totalFolders: 0, totalFiles: 0
         )
 
-        _ = try await mockRepo.getFolderContents(options: ["root": "true", "sort_by": "name"])
-        _ = try await mockRepo.getFolderContents(options: ["folder_id": "d1", "sort_by": "name"])
+        _ = try await mockRepo.getFolderContents(fileOptions: ["root": "true"], folderOptions: ["root": "true", "sort_by": "name"])
+        _ = try await mockRepo.getFolderContents(fileOptions: ["root": "true"], folderOptions: ["folder_id": "d1", "sort_by": "name"])
 
         // Two different calls with different options
         XCTAssertEqual(mockRepo.getFolderContentsCalled, 2)
@@ -172,19 +172,19 @@ final class DriveRepositoryImplTests: XCTestCase {
     // MARK: - Bulk Operations Cache Invalidation
 
     func testBulkDelete_invalidatesCache() async throws {
-        _ = try await mockRepo.getFolderContents(options: ["root": "true"])
+        _ = try await mockRepo.getFolderContents(fileOptions: ["root": "true"], folderOptions: ["root": "true"])
 
         try await mockRepo.bulkDelete(items: [["item_id": "f1", "item_type": "file"]])
 
         XCTAssertEqual(mockRepo.bulkDeleteCalled, 1)
 
         // After bulk delete, cache should be stale
-        _ = try await mockRepo.getFolderContents(options: ["root": "true"])
+        _ = try await mockRepo.getFolderContents(fileOptions: ["root": "true"], folderOptions: ["root": "true"])
         XCTAssertEqual(mockRepo.getFolderContentsCalled, 2)
     }
 
     func testBulkMove_invalidatesCache() async throws {
-        _ = try await mockRepo.getFolderContents(options: ["root": "true"])
+        _ = try await mockRepo.getFolderContents(fileOptions: ["root": "true"], folderOptions: ["root": "true"])
 
         try await mockRepo.bulkMove(
             items: [["item_id": "f1", "item_type": "file"]],

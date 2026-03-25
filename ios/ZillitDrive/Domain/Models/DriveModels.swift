@@ -39,6 +39,7 @@ struct DriveFile: Identifiable, Equatable {
     let createdOn: Int64
     let updatedOn: Int64
     let thumbnailUrl: String?
+    var previewUrl: String? = nil
     var isFavorite: Bool = false
     var userPermissions: DrivePermissions? = nil
 }

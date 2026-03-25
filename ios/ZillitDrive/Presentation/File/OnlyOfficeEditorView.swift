@@ -4,6 +4,7 @@ import WebKit
 struct OnlyOfficeEditorView: View {
     let fileId: String
     let fileName: String
+    var mode: String = "edit" // "edit" or "view"
     @Environment(\.dismiss) private var dismiss
     @State private var isLoading = true
     @State private var error: String?
@@ -47,18 +48,49 @@ struct OnlyOfficeEditorView: View {
         .task { await loadEditor() }
     }
 
+    /// Loads the editor using the same endpoint as the web:
+    /// GET /editor/{fileId}/config?mode=view|edit
+    /// Returns Collabora config with editorUrl, wopiSrc, accessToken.
+    /// Then constructs the Collabora iframe URL for the WebView.
     private func loadEditor() async {
         isLoading = true
         error = nil
         do {
-            let token = try await repository.getEditorPageToken(fileId: fileId)
-            let urlString = "\(AppConfig.driveBaseURL)/v2/drive/editor/\(fileId)/page?token=\(token)"
-            guard let url = URL(string: urlString) else {
-                error = "Invalid editor URL"
-                isLoading = false
-                return
+            let config = try await DriveEndpoints.getEditorConfig(fileId: fileId, mode: mode)
+
+            // The config contains the Collabora editor URL and WOPI parameters
+            // Construct the full URL the same way the web does
+            if let editorUrl = config.editorUrl,
+               let wopiSrc = config.wopiSrc,
+               let accessToken = config.accessToken {
+                // Collabora URL format: {editorUrl}?WOPISrc={wopiSrc}&access_token={accessToken}
+                let encoded = wopiSrc.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? wopiSrc
+                let fullUrl = "\(editorUrl)?WOPISrc=\(encoded)&access_token=\(accessToken)"
+                guard let url = URL(string: fullUrl) else {
+                    self.error = "Invalid editor URL"
+                    isLoading = false
+                    return
+                }
+                editorURL = url
+            } else if let pageUrl = config.pageUrl {
+                // Fallback: backend returned a direct page URL
+                guard let url = URL(string: pageUrl) else {
+                    self.error = "Invalid page URL"
+                    isLoading = false
+                    return
+                }
+                editorURL = url
+            } else {
+                // Final fallback: use page-token approach
+                let token = try await repository.getEditorPageToken(fileId: fileId)
+                let urlString = "\(AppConfig.driveBaseURL)/v2/drive/editor/\(fileId)/page?token=\(token)"
+                guard let url = URL(string: urlString) else {
+                    self.error = "Invalid editor URL"
+                    isLoading = false
+                    return
+                }
+                editorURL = url
             }
-            editorURL = url
         } catch {
             self.error = "Failed to load editor: \(error.localizedDescription)"
             isLoading = false
