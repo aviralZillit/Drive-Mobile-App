@@ -17,6 +17,8 @@ struct HomeView: View {
     @State private var renameText = ""
     @State private var itemToDelete: DriveItem?
     @State private var moveItem_: DriveItem?
+    @State private var isSelecting = false
+    @State private var selectedIds: Set<String> = []
 
     var body: some View {
         VStack(spacing: 0) {
@@ -165,12 +167,74 @@ struct HomeView: View {
                     listContent
                 }
             }
+
+            // Bulk action bar (shown when items selected)
+            if isSelecting && !selectedIds.isEmpty {
+                HStack(spacing: 20) {
+                    Text("\(selectedIds.count) selected")
+                        .font(.subheadline.bold())
+                        .foregroundColor(.primary)
+
+                    Spacer()
+
+                    Button {
+                        let items = viewModel.items.filter { selectedIds.contains($0.id) }
+                        Task {
+                            for item in items { await viewModel.deleteItem(item) }
+                            selectedIds = []
+                            isSelecting = false
+                        }
+                    } label: {
+                        VStack(spacing: 2) {
+                            Image(systemName: "trash")
+                            Text("Delete").font(.caption2)
+                        }
+                    }
+                    .foregroundColor(.red)
+
+                    Button {
+                        // Move all selected — use first item for the sheet
+                        if let first = viewModel.items.first(where: { selectedIds.contains($0.id) }) {
+                            moveItem_ = first
+                        }
+                    } label: {
+                        VStack(spacing: 2) {
+                            Image(systemName: "folder.badge.arrow.forward")
+                            Text("Move").font(.caption2)
+                        }
+                    }
+                    .foregroundColor(.orange)
+
+                    Button {
+                        selectedIds = []
+                        isSelecting = false
+                    } label: {
+                        VStack(spacing: 2) {
+                            Image(systemName: "xmark.circle")
+                            Text("Cancel").font(.caption2)
+                        }
+                    }
+                    .foregroundColor(.secondary)
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 10)
+                .background(Color(.secondarySystemBackground))
+            }
         }
         .navigationTitle(viewModel.driveSection.displayName)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                if !viewModel.items.isEmpty {
+                    Button(isSelecting ? "Done" : "Select") {
+                        isSelecting.toggle()
+                        if !isSelecting { selectedIds = [] }
+                    }
+                }
+            }
+
             ToolbarItem(placement: .navigationBarTrailing) {
-                if viewModel.driveSection == .myDrive {
+                if viewModel.driveSection == .myDrive && !isSelecting {
                     Menu {
                         Button {
                             viewModel.showCreateFolderSheet = true
@@ -277,29 +341,41 @@ struct HomeView: View {
     private var listContent: some View {
         List {
             ForEach(viewModel.items) { item in
-                DriveItemRow(
-                    item: item,
-                    isFavorite: item.isFavorite,
-                    isDropTarget: dropTargetId == item.id,
-                    currentUserId: sessionManager.currentSession?.userId,
-                    badgeCount: viewModel.folderBadges[item.id] ?? 0,
-                    hasUnreadBadge: viewModel.fileBadges.contains(item.id),
-                    onTap: { handleItemTap(item) },
-                    onFavorite: { Task { await viewModel.toggleFavorite(item: item) } },
-                    onDelete: { itemToDelete = item },
-                    onShare: { shareItem(item) },
-                    onMove: { moveItem_ = item },
-                    onRename: {
-                        renameText = item.name
-                        renameItem_ = item
+                HStack(spacing: 8) {
+                    if isSelecting {
+                        Image(systemName: selectedIds.contains(item.id) ? "checkmark.circle.fill" : "circle")
+                            .foregroundColor(selectedIds.contains(item.id) ? .orange : .secondary)
+                            .font(.title3)
+                            .onTapGesture { toggleSelection(item.id) }
                     }
-                )
-                .onDrag {
-                    draggedItem = item
-                    return NSItemProvider(object: item.id as NSString)
-                }
-                .onDrop(of: [UTType.text], isTargeted: dropBinding(for: item)) { providers in
-                    handleDrop(onto: item, providers: providers)
+
+                    DriveItemRow(
+                        item: item,
+                        isFavorite: item.isFavorite,
+                        isDropTarget: dropTargetId == item.id,
+                        currentUserId: sessionManager.currentSession?.userId,
+                        badgeCount: viewModel.folderBadges[item.id] ?? 0,
+                        hasUnreadBadge: viewModel.fileBadges.contains(item.id),
+                        onTap: {
+                            if isSelecting { toggleSelection(item.id) }
+                            else { handleItemTap(item) }
+                        },
+                        onFavorite: { Task { await viewModel.toggleFavorite(item: item) } },
+                        onDelete: { itemToDelete = item },
+                        onShare: { shareItem(item) },
+                        onMove: { moveItem_ = item },
+                        onRename: {
+                            renameText = item.name
+                            renameItem_ = item
+                        }
+                    )
+                    .onDrag {
+                        draggedItem = item
+                        return NSItemProvider(object: item.id as NSString)
+                    }
+                    .onDrop(of: [UTType.text], isTargeted: dropBinding(for: item)) { providers in
+                        handleDrop(onto: item, providers: providers)
+                    }
                 }
             }
         }
@@ -314,15 +390,34 @@ struct HomeView: View {
                 GridItem(.adaptive(minimum: 150), spacing: 12)
             ], spacing: 12) {
                 ForEach(viewModel.items) { item in
-                    DriveItemGridCell(
-                        item: item,
-                        isFavorite: item.isFavorite,
-                        isDropTarget: dropTargetId == item.id,
-                        currentUserId: sessionManager.currentSession?.userId,
-                        badgeCount: viewModel.folderBadges[item.id] ?? 0,
-                        hasUnreadBadge: viewModel.fileBadges.contains(item.id),
-                        onTap: { handleItemTap(item) }
-                    )
+                    ZStack(alignment: .topLeading) {
+                        DriveItemGridCell(
+                            item: item,
+                            isFavorite: item.isFavorite,
+                            isDropTarget: dropTargetId == item.id,
+                            currentUserId: sessionManager.currentSession?.userId,
+                            badgeCount: viewModel.folderBadges[item.id] ?? 0,
+                            hasUnreadBadge: viewModel.fileBadges.contains(item.id),
+                            onTap: {
+                                if isSelecting { toggleSelection(item.id) }
+                                else { handleItemTap(item) }
+                            }
+                        )
+                        .overlay(
+                            isSelecting && selectedIds.contains(item.id)
+                                ? RoundedRectangle(cornerRadius: 12).stroke(Color.orange, lineWidth: 2)
+                                : nil
+                        )
+
+                        if isSelecting {
+                            Image(systemName: selectedIds.contains(item.id) ? "checkmark.circle.fill" : "circle")
+                                .foregroundColor(selectedIds.contains(item.id) ? .orange : .white.opacity(0.8))
+                                .font(.title3)
+                                .shadow(radius: 2)
+                                .padding(6)
+                                .onTapGesture { toggleSelection(item.id) }
+                        }
+                    }
                     .onDrag {
                         draggedItem = item
                         return NSItemProvider(object: item.id as NSString)
@@ -362,6 +457,13 @@ struct HomeView: View {
 
     // MARK: - Helpers
 
+    private func toggleSelection(_ id: String) {
+        if selectedIds.contains(id) {
+            selectedIds.remove(id)
+        } else {
+            selectedIds.insert(id)
+        }
+    }
 
     private func handleItemTap(_ item: DriveItem) {
         switch item {
