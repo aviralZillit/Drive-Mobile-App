@@ -159,6 +159,9 @@ struct UploadView: View {
                 uploads[idx].progress = 1.0
             }
         } catch {
+            #if DEBUG
+            print("🔴 Upload error for \(task.fileName): \(error)")
+            #endif
             if let idx = uploads.firstIndex(where: { $0.id == task.id }) {
                 uploads[idx].status = .failed
             }
