@@ -99,6 +99,7 @@ struct TrashView: View {
         do {
             try await repository.restoreTrashItem(type: item.itemType, itemId: item.id)
             await loadTrash()
+            NotificationCenter.default.post(name: .driveContentChanged, object: nil)
         } catch {
             errorMessage = error.localizedDescription
         }

@@ -3,6 +3,7 @@ import UniformTypeIdentifiers
 
 extension Notification.Name {
     static let driveUploadCompleted = Notification.Name("driveUploadCompleted")
+    static let driveContentChanged = Notification.Name("driveContentChanged")
 }
 
 // MARK: - Types
@@ -26,7 +27,9 @@ struct UploadFileEntry: Identifiable, Equatable {
     var serverUploadId: String?
     var completedParts: Set<Int> = []
 
-    static func == (lhs: Self, rhs: Self) -> Bool { lhs.id == rhs.id }
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.id == rhs.id && lhs.status == rhs.status && lhs.progress == rhs.progress
+    }
 
     var statusText: String {
         switch status {

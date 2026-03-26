@@ -25,34 +25,45 @@ final class HomeViewModel: ObservableObject {
     private var loadTask: Task<Void, Never>?
     private var loadId: UInt64 = 0
 
-    private var uploadObserver: Any?
+    private var observers: [Any] = []
 
     init(repository: DriveRepository = DriveRepositoryImpl()) {
         self.repository = repository
         setupSocket()
-        setupUploadObserver()
+        setupObservers()
     }
 
     deinit {
-        if let observer = uploadObserver {
-            NotificationCenter.default.removeObserver(observer)
-        }
+        observers.forEach { NotificationCenter.default.removeObserver($0) }
     }
 
-    private func setupUploadObserver() {
-        uploadObserver = NotificationCenter.default.addObserver(
+    private func setupObservers() {
+        // Upload completed → wait 2s for server, then refresh
+        observers.append(NotificationCenter.default.addObserver(
             forName: .driveUploadCompleted, object: nil, queue: .main
         ) { [weak self] _ in
             guard let self else { return }
             Task { @MainActor in
-                print("📤 [Upload] Upload completed — waiting 2s for server to finalize, then refreshing")
-                // Give server time to finalize the file record
+                print("📤 [Upload] Upload completed — waiting 2s then refreshing")
                 try? await Task.sleep(nanoseconds: 2_000_000_000)
                 self.repository.invalidateAll()
                 await self.forceLoadContents()
-                print("📤 [Upload] Refresh done — \(self.items.count) items now visible")
+                print("📤 [Upload] Refresh done — \(self.items.count) items")
             }
-        }
+        })
+
+        // Content changed (trash restore, delete, etc.) → refresh immediately
+        observers.append(NotificationCenter.default.addObserver(
+            forName: .driveContentChanged, object: nil, queue: .main
+        ) { [weak self] _ in
+            guard let self else { return }
+            Task { @MainActor in
+                print("🔄 [Content] Drive content changed — refreshing")
+                self.repository.invalidateAll()
+                await self.forceLoadContents()
+                print("🔄 [Content] Refresh done — \(self.items.count) items")
+            }
+        })
     }
 
     var currentFolderId: String? {
