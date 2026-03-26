@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 @MainActor
 final class HomeViewModel: ObservableObject {
@@ -24,9 +25,34 @@ final class HomeViewModel: ObservableObject {
     private var loadTask: Task<Void, Never>?
     private var loadId: UInt64 = 0
 
+    private var uploadObserver: Any?
+
     init(repository: DriveRepository = DriveRepositoryImpl()) {
         self.repository = repository
         setupSocket()
+        setupUploadObserver()
+    }
+
+    deinit {
+        if let observer = uploadObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+
+    private func setupUploadObserver() {
+        uploadObserver = NotificationCenter.default.addObserver(
+            forName: .driveUploadCompleted, object: nil, queue: .main
+        ) { [weak self] _ in
+            guard let self else { return }
+            Task { @MainActor in
+                print("📤 [Upload] Upload completed — waiting 2s for server to finalize, then refreshing")
+                // Give server time to finalize the file record
+                try? await Task.sleep(nanoseconds: 2_000_000_000)
+                self.repository.invalidateAll()
+                await self.forceLoadContents()
+                print("📤 [Upload] Refresh done — \(self.items.count) items now visible")
+            }
+        }
     }
 
     var currentFolderId: String? {
@@ -349,6 +375,25 @@ final class HomeViewModel: ObservableObject {
         loadTask = Task { await loadContents() }
     }
 
+    func downloadAllAsZip() async {
+        let fileIds = items.compactMap { item -> String? in
+            if case .file(let file) = item { return file.id }
+            return nil
+        }
+        guard !fileIds.isEmpty else { return }
+        do {
+            let url = try await repository.bulkDownloadUrls(fileIds: fileIds)
+            // Open in browser or trigger system download
+            if let downloadUrl = URL(string: url) {
+                await MainActor.run {
+                    UIApplication.shared.open(downloadUrl)
+                }
+            }
+        } catch {
+            errorMessage = "Download failed: \(error.localizedDescription)"
+        }
+    }
+
     func moveItemToFolder(_ item: DriveItem, targetFolderId: String?) async {
         do {
             switch item {
@@ -408,7 +453,11 @@ final class HomeViewModel: ObservableObject {
     // MARK: - Socket.IO Real-Time Events
 
     private func setupSocket() {
-        guard let session = SessionManager.shared.currentSession else { return }
+        guard let session = SessionManager.shared.currentSession else {
+            print("🔌 [DriveSocket] No session — skipping socket setup")
+            return
+        }
+        print("🔌 [DriveSocket] Setting up socket → \(AppConfig.socketURL) room=\(session.projectId)_room")
         socketManager.connect(socketURL: AppConfig.socketURL, projectId: session.projectId)
 
         // Drive data changes → refetch
@@ -417,7 +466,8 @@ final class HomeViewModel: ObservableObject {
             "drive:folder:created", "drive:folder:updated", "drive:folder:deleted",
         ]
         for event in refreshEvents {
-            socketManager.on(event) { [weak self] _ in
+            socketManager.on(event) { [weak self] data in
+                print("🔌 [DriveSocket] Received event: \(event) — refreshing")
                 Task { @MainActor in await self?.forceLoadContents() }
             }
         }

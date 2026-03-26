@@ -1,5 +1,8 @@
 package com.zillit.drive.data.repository
 
+import com.zillit.drive.data.local.db.DriveDao
+import com.zillit.drive.data.local.db.DriveFileEntity
+import com.zillit.drive.data.local.db.DriveFolderEntity
 import com.zillit.drive.data.mapper.DriveMapper
 import com.zillit.drive.data.remote.api.DriveApi
 import com.zillit.drive.data.remote.dto.*
@@ -12,7 +15,8 @@ import javax.inject.Singleton
 @Singleton
 class DriveRepositoryImpl @Inject constructor(
     private val api: DriveApi,
-    private val mapper: DriveMapper
+    private val mapper: DriveMapper,
+    private val driveDao: DriveDao
 ) : DriveRepository {
 
     // ─── Caches ───
@@ -46,6 +50,8 @@ class DriveRepositoryImpl @Inject constructor(
         fileCache.clear()
         favoriteIdsCache = null
         favoriteIdsCacheTimestamp = 0L
+        // Note: Room cache is cleared lazily on next getFiles/getFolders call
+        // to avoid blocking on the main thread
     }
 
     private suspend fun <T, R> safeApiCall(
@@ -66,8 +72,35 @@ class DriveRepositoryImpl @Inject constructor(
 
     // ─── Files ───
 
-    override suspend fun getFiles(options: Map<String, String>): Result<List<DriveFile>> =
-        safeApiCall({ api.getFiles(options) }) { dtos -> dtos.map(mapper::toFile) }
+    override suspend fun getFiles(options: Map<String, String>): Result<List<DriveFile>> {
+        // First, return cached data from Room if available
+        val folderId = options["folder_id"]
+        val cachedFiles = try {
+            driveDao.getFilesByFolder(folderId).map { it.toDomainModel() }
+        } catch (e: Exception) {
+            emptyList()
+        }
+
+        // Fetch from API
+        val apiResult = safeApiCall({ api.getFiles(options) }) { dtos -> dtos.map(mapper::toFile) }
+
+        // Update Room cache with fresh data on success
+        apiResult.getOrNull()?.let { files ->
+            try {
+                driveDao.clearFilesByFolder(folderId)
+                driveDao.insertFiles(files.map { DriveFileEntity.fromDomainModel(it) })
+            } catch (e: Exception) {
+                // Cache update failure is non-fatal
+            }
+        }
+
+        // If API failed but we have cache, return cache
+        if (apiResult.isFailure && cachedFiles.isNotEmpty()) {
+            return Result.success(cachedFiles)
+        }
+
+        return apiResult
+    }
 
     override suspend fun getFile(fileId: String): Result<DriveFile> {
         fileCache[fileId]?.let { return Result.success(it) }
@@ -123,8 +156,35 @@ class DriveRepositoryImpl @Inject constructor(
 
     // ─── Folders ───
 
-    override suspend fun getFolders(options: Map<String, String>): Result<List<DriveFolder>> =
-        safeApiCall({ api.getFolders(options) }) { dtos -> dtos.map(mapper::toFolder) }
+    override suspend fun getFolders(options: Map<String, String>): Result<List<DriveFolder>> {
+        // First, return cached data from Room if available
+        val parentId = options["parent_folder_id"]
+        val cachedFolders = try {
+            driveDao.getFoldersByParent(parentId).map { it.toDomainModel() }
+        } catch (e: Exception) {
+            emptyList()
+        }
+
+        // Fetch from API
+        val apiResult = safeApiCall({ api.getFolders(options) }) { dtos -> dtos.map(mapper::toFolder) }
+
+        // Update Room cache with fresh data on success
+        apiResult.getOrNull()?.let { folders ->
+            try {
+                driveDao.clearFoldersByParent(parentId)
+                driveDao.insertFolders(folders.map { DriveFolderEntity.fromDomainModel(it) })
+            } catch (e: Exception) {
+                // Cache update failure is non-fatal
+            }
+        }
+
+        // If API failed but we have cache, return cache
+        if (apiResult.isFailure && cachedFolders.isNotEmpty()) {
+            return Result.success(cachedFolders)
+        }
+
+        return apiResult
+    }
 
     override suspend fun getFolder(folderId: String): Result<DriveFolder> =
         safeApiCall({ api.getFolder(folderId) }) { mapper.toFolder(it) }

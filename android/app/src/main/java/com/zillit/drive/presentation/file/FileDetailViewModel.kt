@@ -203,6 +203,30 @@ class FileDetailViewModel @Inject constructor(
         }
     }
 
+    fun restoreVersion(versionId: String) {
+        val id = fileId ?: return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            repository.restoreVersion(id, versionId).fold(
+                onSuccess = {
+                    _uiState.update { it.copy(isLoading = false) }
+                    // Refresh file details and versions after restore
+                    loadFile(id)
+                },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = error.message ?: "Failed to restore version"
+                        )
+                    }
+                }
+            )
+        }
+    }
+
     fun clearError() {
         _uiState.update { it.copy(error = null) }
     }

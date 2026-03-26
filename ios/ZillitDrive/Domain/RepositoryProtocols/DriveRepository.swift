@@ -57,6 +57,7 @@ protocol DriveRepository {
     // Bulk
     func bulkDelete(items: [[String: String]]) async throws
     func bulkMove(items: [[String: String]], targetFolderId: String?) async throws
+    func bulkDownloadUrls(fileIds: [String]) async throws -> String
 
     // Activity
     func getActivity(options: [String: String]) async throws -> [DriveActivity]

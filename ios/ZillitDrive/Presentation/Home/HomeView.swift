@@ -239,12 +239,21 @@ struct HomeView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                if viewModel.driveSection == .myDrive && !isSelecting {
+                if !isSelecting {
                     Menu {
-                        Button {
-                            viewModel.showCreateFolderSheet = true
-                        } label: {
-                            Label("New Folder", systemImage: "folder.badge.plus")
+                        if viewModel.driveSection == .myDrive {
+                            Button {
+                                viewModel.showCreateFolderSheet = true
+                            } label: {
+                                Label("New Folder", systemImage: "folder.badge.plus")
+                            }
+                        }
+                        if !viewModel.items.isEmpty {
+                            Button {
+                                Task { await viewModel.downloadAllAsZip() }
+                            } label: {
+                                Label("Download All", systemImage: "arrow.down.circle")
+                            }
                         }
                     } label: {
                         Image(systemName: "plus")

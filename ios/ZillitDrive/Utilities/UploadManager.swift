@@ -1,6 +1,10 @@
 import Foundation
 import UniformTypeIdentifiers
 
+extension Notification.Name {
+    static let driveUploadCompleted = Notification.Name("driveUploadCompleted")
+}
+
 // MARK: - Types
 
 enum UploadFileStatus: String {
@@ -285,6 +289,9 @@ final class UploadManager: ObservableObject {
                 $0.speed = 0
                 $0.eta = 0
             }
+
+            // Notify listeners (HomeViewModel) to refresh file list
+            NotificationCenter.default.post(name: .driveUploadCompleted, object: nil)
 
         } catch is CancellationError {
             // Paused or cancelled — don't mark as failed

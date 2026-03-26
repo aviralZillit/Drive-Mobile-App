@@ -1,5 +1,10 @@
 package com.zillit.drive.presentation.home
 
+import android.app.Application
+import android.app.DownloadManager
+import android.content.Context
+import android.net.Uri
+import android.os.Environment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zillit.drive.BuildConfig
@@ -51,7 +56,8 @@ data class HomeUiState(
 class HomeViewModel @Inject constructor(
     private val repository: DriveRepository,
     private val sessionManager: SessionManager,
-    private val socketManager: DriveSocketManager
+    private val socketManager: DriveSocketManager,
+    private val application: Application
 ) : ViewModel() {
 
     val currentUserId: String?
@@ -502,6 +508,73 @@ class HomeViewModel @Inject constructor(
                     error = e.message ?: "Failed to load contents"
                 ) }
             }
+        }
+    }
+
+    // ─── Batch Download as ZIP ───
+
+    fun downloadAllAsZip() {
+        val state = _uiState.value
+        val fileIds = if (state.isSelecting && state.selectedIds.isNotEmpty()) {
+            // Download selected files only
+            state.items
+                .filterIsInstance<DriveItem.File>()
+                .filter { it.id in state.selectedIds }
+                .map { it.id }
+        } else {
+            // Download all files in current view
+            state.items.filterIsInstance<DriveItem.File>().map { it.id }
+        }
+
+        if (fileIds.isEmpty()) {
+            _uiState.update { it.copy(error = "No files to download") }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            repository.bulkDownloadUrls(fileIds).fold(
+                onSuccess = { urls ->
+                    _uiState.update { it.copy(isLoading = false) }
+                    if (urls.isNotEmpty()) {
+                        // Use DownloadManager for each URL (typically the API returns a single ZIP URL)
+                        urls.forEach { url ->
+                            enqueueDownload(url, "zillit_drive_files.zip")
+                        }
+                    }
+                    // Exit select mode after download
+                    if (state.isSelecting) {
+                        exitSelectMode()
+                    }
+                },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = error.message ?: "Failed to download files"
+                        )
+                    }
+                }
+            )
+        }
+    }
+
+    private fun enqueueDownload(url: String, fileName: String) {
+        try {
+            val request = DownloadManager.Request(Uri.parse(url)).apply {
+                setTitle("Zillit Drive - $fileName")
+                setDescription("Downloading files from Zillit Drive")
+                setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+                setAllowedOverMetered(true)
+                setAllowedOverRoaming(false)
+            }
+
+            val downloadManager = application.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+            downloadManager.enqueue(request)
+        } catch (e: Exception) {
+            _uiState.update { it.copy(error = "Failed to start download: ${e.message}") }
         }
     }
 

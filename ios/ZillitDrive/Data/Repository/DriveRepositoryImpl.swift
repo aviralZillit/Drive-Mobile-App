@@ -327,6 +327,10 @@ final class DriveRepositoryImpl: DriveRepository {
         await cache.invalidateContents(folderId: nil)
     }
 
+    func bulkDownloadUrls(fileIds: [String]) async throws -> String {
+        try await DriveEndpoints.bulkDownloadUrls(fileIds: fileIds)
+    }
+
     // MARK: - Activity
 
     func getActivity(options: [String: String]) async throws -> [DriveActivity] {

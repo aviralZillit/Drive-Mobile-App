@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -19,6 +20,7 @@ import com.zillit.drive.databinding.FragmentUploadBinding
 import com.zillit.drive.presentation.adapter.UploadItemAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.io.File
 
 @AndroidEntryPoint
 class UploadFragment : Fragment() {
@@ -28,10 +30,38 @@ class UploadFragment : Fragment() {
     private val viewModel: UploadViewModel by viewModels()
     private lateinit var adapter: UploadItemAdapter
 
+    private var isFabMenuOpen = false
+
+    // Current camera capture URI (set before launching camera intent)
+    private var pendingPhotoUri: Uri? = null
+    private var pendingVideoUri: Uri? = null
+
     private val filePickerLauncher = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         uri?.let { handleSelectedFile(it) }
+    }
+
+    private val takePhotoLauncher = registerForActivityResult(
+        ActivityResultContracts.TakePicture()
+    ) { success: Boolean ->
+        if (success) {
+            pendingPhotoUri?.let { uri ->
+                handleCapturedFile(uri, "photo_${System.currentTimeMillis()}.jpg", "image/jpeg")
+            }
+        }
+        pendingPhotoUri = null
+    }
+
+    private val captureVideoLauncher = registerForActivityResult(
+        ActivityResultContracts.CaptureVideo()
+    ) { success: Boolean ->
+        if (success) {
+            pendingVideoUri?.let { uri ->
+                handleCapturedFile(uri, "video_${System.currentTimeMillis()}.mp4", "video/mp4")
+            }
+        }
+        pendingVideoUri = null
     }
 
     override fun onCreateView(
@@ -72,8 +102,91 @@ class UploadFragment : Fragment() {
 
     private fun setupListeners() {
         binding.fabSelectFile.setOnClickListener {
-            filePickerLauncher.launch(arrayOf("*/*"))
+            if (isFabMenuOpen) {
+                closeFabMenu()
+                filePickerLauncher.launch(arrayOf("*/*"))
+            } else {
+                openFabMenu()
+            }
         }
+
+        binding.fabCapturePhoto.setOnClickListener {
+            closeFabMenu()
+            launchPhotoCapture()
+        }
+
+        binding.fabCaptureVideo.setOnClickListener {
+            closeFabMenu()
+            launchVideoCapture()
+        }
+    }
+
+    private fun openFabMenu() {
+        isFabMenuOpen = true
+        binding.fabCapturePhoto.visibility = View.VISIBLE
+        binding.fabCaptureVideo.visibility = View.VISIBLE
+        binding.fabSelectFile.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+    }
+
+    private fun closeFabMenu() {
+        isFabMenuOpen = false
+        binding.fabCapturePhoto.visibility = View.GONE
+        binding.fabCaptureVideo.visibility = View.GONE
+        binding.fabSelectFile.setImageResource(android.R.drawable.ic_input_add)
+    }
+
+    private fun launchPhotoCapture() {
+        val photoFile = createCaptureFile("IMG_${System.currentTimeMillis()}.jpg")
+        val uri = FileProvider.getUriForFile(
+            requireContext(),
+            "${requireContext().packageName}.fileprovider",
+            photoFile
+        )
+        pendingPhotoUri = uri
+        takePhotoLauncher.launch(uri)
+    }
+
+    private fun launchVideoCapture() {
+        val videoFile = createCaptureFile("VID_${System.currentTimeMillis()}.mp4")
+        val uri = FileProvider.getUriForFile(
+            requireContext(),
+            "${requireContext().packageName}.fileprovider",
+            videoFile
+        )
+        pendingVideoUri = uri
+        captureVideoLauncher.launch(uri)
+    }
+
+    private fun createCaptureFile(fileName: String): File {
+        val captureDir = File(requireContext().cacheDir, "camera_captures")
+        if (!captureDir.exists()) captureDir.mkdirs()
+        return File(captureDir, fileName)
+    }
+
+    private fun handleCapturedFile(uri: Uri, fileName: String, mimeType: String) {
+        val contentResolver = requireContext().contentResolver
+
+        // Get actual file size from the content resolver
+        var fileSize = 0L
+        val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val sizeIndex = it.getColumnIndex(OpenableColumns.SIZE)
+                if (sizeIndex >= 0) {
+                    fileSize = it.getLong(sizeIndex)
+                }
+            }
+        }
+
+        val folderId = arguments?.getString("folderId")
+
+        viewModel.startUpload(
+            uri = uri,
+            fileName = fileName,
+            fileSize = fileSize,
+            mimeType = mimeType,
+            folderId = folderId
+        )
     }
 
     private fun observeState() {

@@ -5,7 +5,7 @@ import Foundation
 enum AppConfig {
     #if DEBUG
     static let driveBaseURL = "https://driveapi-dev.zillit.com/api"
-    static let socketURL = "https://driveapi-dev.zillit.com"
+    static let socketURL = "https://cncapi-dev.zillit.com"
     // Other services use remote dev APIs
     static let projectBaseURL = "https://projectapi-dev.zillit.com/api"
     static let notificationBaseURL = "https://notificationapi-dev.zillit.com/api"

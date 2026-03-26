@@ -29,14 +29,24 @@ final class DriveSocketManager: ObservableObject {
 
     func connect(socketURL: String, projectId: String) {
         guard let url = URL(string: socketURL) else {
-            #if DEBUG
-            print("[DriveSocket] Invalid socket URL: \(socketURL)")
-            #endif
+            print("🔌 [DriveSocket] Invalid socket URL: \(socketURL)")
             return
         }
 
         // Disconnect previous connection if any
         disconnect()
+
+        // Generate moduledata for socket auth (same as web's encryptHeaders)
+        guard let session = SessionManager.shared.currentSession else {
+            print("🔌 [DriveSocket] No session for socket auth")
+            return
+        }
+        let moduledata = AESCBCEncryptor.generateModuleData(
+            userId: session.userId,
+            projectId: session.projectId,
+            deviceId: session.deviceId
+        )
+        print("🔌 [DriveSocket] Auth moduledata generated (\(moduledata.prefix(40))...)")
 
         manager = SocketManager(socketURL: url, config: [
             .log(false),
@@ -44,33 +54,39 @@ final class DriveSocketManager: ObservableObject {
             .reconnects(true),
             .reconnectWait(2),
             .reconnectWaitMax(30),
+            .version(.three),
+            .extraHeaders(["moduledata": moduledata]),
+            .connectParams(["moduledata": moduledata]),
         ])
         socket = manager?.defaultSocket
 
         socket?.on(clientEvent: .connect) { [weak self] _, _ in
             Task { @MainActor in
                 self?.isConnected = true
-                #if DEBUG
-                print("[DriveSocket] Connected — joining room \(projectId)_room")
-                #endif
             }
-            // Join the project room (same as web: socket.emit('join_room', ...))
+            print("🔌 [DriveSocket] Connected — emitting user:join + joining room \(projectId)_room")
+            // Web emits user:join first, then join_room
+            self?.socket?.emit("user:join", [:])
             self?.socket?.emit("join_room", ["room": "\(projectId)_room"])
         }
 
         socket?.on(clientEvent: .disconnect) { [weak self] _, _ in
             Task { @MainActor in
                 self?.isConnected = false
-                #if DEBUG
-                print("[DriveSocket] Disconnected")
-                #endif
             }
+            print("🔌 [DriveSocket] Disconnected")
         }
 
         socket?.on(clientEvent: .error) { data, _ in
-            #if DEBUG
-            print("[DriveSocket] Error: \(data)")
-            #endif
+            print("🔌 [DriveSocket] Error: \(data)")
+        }
+
+        socket?.on(clientEvent: .reconnectAttempt) { data, _ in
+            print("🔌 [DriveSocket] Reconnect attempt: \(data)")
+        }
+
+        socket?.on(clientEvent: .statusChange) { data, _ in
+            print("🔌 [DriveSocket] Status change: \(data)")
         }
 
         // Re-register stored listeners

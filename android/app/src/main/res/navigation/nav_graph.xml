@@ -24,6 +24,11 @@
         android:name="com.zillit.drive.presentation.home.HomeFragment"
         android:label="Files"
         tools:layout="@layout/fragment_home">
+        <argument
+            android:name="folderId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
         <action
             android:id="@+id/action_home_to_folder"
             app:destination="@id/folderFragment" />
@@ -33,6 +38,9 @@
         <action
             android:id="@+id/action_home_to_share"
             app:destination="@id/shareFragment" />
+        <deepLink
+            android:id="@+id/deepLink_folder"
+            app:uri="zillit-drive://folder/{folderId}" />
     </fragment>
 
     <fragment
@@ -66,6 +74,9 @@
         <action
             android:id="@+id/action_file_detail_to_share"
             app:destination="@id/shareFragment" />
+        <deepLink
+            android:id="@+id/deepLink_file"
+            app:uri="zillit-drive://file/{fileId}" />
     </fragment>
 
     <!-- Search Tab -->

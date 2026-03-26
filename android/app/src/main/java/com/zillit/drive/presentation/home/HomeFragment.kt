@@ -164,6 +164,11 @@ class HomeFragment : Fragment() {
         binding.btnBulkMove.setOnClickListener {
             showFolderPickerForBulkMove()
         }
+
+        binding.btnBulkDownload.setOnClickListener {
+            viewModel.downloadAllAsZip()
+            Toast.makeText(requireContext(), "Download started", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun observeState() {

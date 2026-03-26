@@ -92,7 +92,37 @@
 
     </FrameLayout>
 
-    <!-- FAB for selecting a file -->
+    <!-- FAB group for upload options -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabCapturePhoto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:src="@android:drawable/ic_menu_camera"
+        android:contentDescription="Capture photo"
+        app:backgroundTint="#1353D1"
+        app:tint="@android:color/white"
+        app:fabSize="mini"
+        app:layout_constraintBottom_toTopOf="@id/fabCaptureVideo"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabCaptureVideo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:src="@android:drawable/presence_video_online"
+        android:contentDescription="Capture video"
+        app:backgroundTint="#1353D1"
+        app:tint="@android:color/white"
+        app:fabSize="mini"
+        app:layout_constraintBottom_toTopOf="@id/fabSelectFile"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabSelectFile"
         android:layout_width="wrap_content"

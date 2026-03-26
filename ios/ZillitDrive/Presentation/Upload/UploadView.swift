@@ -6,6 +6,7 @@ struct UploadView: View {
     @StateObject private var uploadManager = UploadManager.shared
     @State private var showFilePicker = false
     @State private var showPhotoPicker = false
+    @State private var showCamera = false
     @State private var selectedPhotos: [PhotosPickerItem] = []
 
     var body: some View {
@@ -22,19 +23,29 @@ struct UploadView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
 
-                    HStack(spacing: 16) {
-                        Button {
-                            showPhotoPicker = true
-                        } label: {
-                            Label("Photos & Videos", systemImage: "photo.on.rectangle")
+                    VStack(spacing: 12) {
+                        HStack(spacing: 16) {
+                            Button {
+                                showPhotoPicker = true
+                            } label: {
+                                Label("Photos & Videos", systemImage: "photo.on.rectangle")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.orange)
+
+                            Button {
+                                showFilePicker = true
+                            } label: {
+                                Label("Files", systemImage: "folder")
+                            }
+                            .buttonStyle(.bordered)
+                            .tint(.orange)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.orange)
 
                         Button {
-                            showFilePicker = true
+                            showCamera = true
                         } label: {
-                            Label("Files", systemImage: "folder")
+                            Label("Take Photo / Video", systemImage: "camera.fill")
                         }
                         .buttonStyle(.bordered)
                         .tint(.orange)
@@ -63,10 +74,21 @@ struct UploadView: View {
                     } label: {
                         Label("Files", systemImage: "folder")
                     }
+                    Button {
+                        showCamera = true
+                    } label: {
+                        Label("Camera", systemImage: "camera")
+                    }
                 } label: {
                     Image(systemName: "plus")
                 }
             }
+        }
+        .fullScreenCover(isPresented: $showCamera) {
+            CameraPicker { capturedURL in
+                uploadManager.addFiles([capturedURL], folderId: nil)
+            }
+            .ignoresSafeArea()
         }
         .fileImporter(
             isPresented: $showFilePicker,
@@ -118,7 +140,7 @@ struct UploadView: View {
 
 struct UploadRow: View {
     let upload: UploadFileEntry
-    @StateObject private var manager = UploadManager.shared
+    @ObservedObject private var manager = UploadManager.shared
 
     var body: some View {
         HStack(spacing: 12) {
@@ -132,7 +154,7 @@ struct UploadRow: View {
                     .font(.body)
                     .lineLimit(1)
 
-                ProgressView(value: upload.progress)
+                ProgressView(value: min(max(upload.progress, 0), 1.0))
                     .tint(progressColor)
 
                 Text(upload.statusText)

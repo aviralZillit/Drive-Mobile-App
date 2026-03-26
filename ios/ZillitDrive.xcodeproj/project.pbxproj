@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		98FA894E2F74158600EB26E6 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = A90001AA /* Kingfisher */; };
+		98FA894F2F74158600EB26E6 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = A90002AA /* SocketIO */; };
+		98FA89512F75109900EB26E6 /* UploadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98FA89502F75109900EB26E6 /* UploadManager.swift */; };
+		98FA89542F7511D900EB26E6 /* FolderPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98FA89532F7511D900EB26E6 /* FolderPickerSheet.swift */; };
+		98FA89552F7511D900EB26E6 /* CameraPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98FA89522F7511D900EB26E6 /* CameraPicker.swift */; };
+		98FA89572F75120500EB26E6 /* OfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98FA89562F75120500EB26E6 /* OfflineCache.swift */; };
 		A10001AA /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10001AB /* AppConfig.swift */; };
 		A10002AA /* ZillitDriveApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10002AB /* ZillitDriveApp.swift */; };
 		A10003AA /* SessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10003AB /* SessionManager.swift */; };
@@ -33,7 +39,6 @@
 		A10024AA /* AESCBCEncryptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10024AB /* AESCBCEncryptor.swift */; };
 		A10025AA /* BodyHashGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10025AB /* BodyHashGenerator.swift */; };
 		A10026AA /* FileUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10026AB /* FileUtils.swift */; };
-		A10040AA /* DriveSocketManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10040AB /* DriveSocketManager.swift */; };
 		A10027AA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A10027AB /* Assets.xcassets */; };
 		A10028AA /* AESCBCEncryptorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10028AB /* AESCBCEncryptorTests.swift */; };
 		A10029AA /* BodyHashGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10029AB /* BodyHashGeneratorTests.swift */; };
@@ -47,6 +52,7 @@
 		A10037AA /* ShareViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10037AB /* ShareViewTests.swift */; };
 		A10038AA /* SessionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10038AB /* SessionManagerTests.swift */; };
 		A10039AA /* OnlyOfficeEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10039AB /* OnlyOfficeEditorView.swift */; };
+		A10040AA /* DriveSocketManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10040AB /* DriveSocketManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +66,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		98FA89502F75109900EB26E6 /* UploadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadManager.swift; sourceTree = "<group>"; };
+		98FA89522F7511D900EB26E6 /* CameraPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPicker.swift; sourceTree = "<group>"; };
+		98FA89532F7511D900EB26E6 /* FolderPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderPickerSheet.swift; sourceTree = "<group>"; };
+		98FA89562F75120500EB26E6 /* OfflineCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineCache.swift; sourceTree = "<group>"; };
 		A10001AB /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
 		A10002AB /* ZillitDriveApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZillitDriveApp.swift; sourceTree = "<group>"; };
 		A10003AB /* SessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManager.swift; sourceTree = "<group>"; };
@@ -76,7 +86,6 @@
 		A10014AB /* DriveItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveItemRow.swift; sourceTree = "<group>"; };
 		A10015AB /* FavoritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesView.swift; sourceTree = "<group>"; };
 		A10016AB /* FileDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDetailView.swift; sourceTree = "<group>"; };
-		A10039AB /* OnlyOfficeEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnlyOfficeEditorView.swift; sourceTree = "<group>"; };
 		A10017AB /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		A10018AB /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
 		A10019AB /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
@@ -87,7 +96,6 @@
 		A10024AB /* AESCBCEncryptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AESCBCEncryptor.swift; sourceTree = "<group>"; };
 		A10025AB /* BodyHashGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyHashGenerator.swift; sourceTree = "<group>"; };
 		A10026AB /* FileUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileUtils.swift; sourceTree = "<group>"; };
-		A10040AB /* DriveSocketManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveSocketManager.swift; sourceTree = "<group>"; };
 		A10027AB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A10028AB /* AESCBCEncryptorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AESCBCEncryptorTests.swift; sourceTree = "<group>"; };
 		A10029AB /* BodyHashGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyHashGeneratorTests.swift; sourceTree = "<group>"; };
@@ -100,6 +108,8 @@
 		A10036AB /* SortOptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortOptionTests.swift; sourceTree = "<group>"; };
 		A10037AB /* ShareViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewTests.swift; sourceTree = "<group>"; };
 		A10038AB /* SessionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionManagerTests.swift; sourceTree = "<group>"; };
+		A10039AB /* OnlyOfficeEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnlyOfficeEditorView.swift; sourceTree = "<group>"; };
+		A10040AB /* DriveSocketManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveSocketManager.swift; sourceTree = "<group>"; };
 		A40001AB /* ZillitDrive.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZillitDrive.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A40002AB /* ZillitDriveTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZillitDriveTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -109,6 +119,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				98FA894F2F74158600EB26E6 /* SocketIO in Frameworks */,
+				98FA894E2F74158600EB26E6 /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -122,22 +134,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		A60001AA /* Root */ = {
+		A60001AA = {
 			isa = PBXGroup;
 			children = (
 				A60002AA /* ZillitDrive */,
 				A60020AA /* ZillitDriveTests */,
 				A60099AA /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		A60099AA /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				A40001AB /* ZillitDrive.app */,
-				A40002AB /* ZillitDriveTests.xctest */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		A60002AA /* ZillitDrive */ = {
@@ -176,6 +179,7 @@
 		A60005AA /* Local */ = {
 			isa = PBXGroup;
 			children = (
+				98FA89562F75120500EB26E6 /* OfflineCache.swift */,
 				A10003AB /* SessionManager.swift */,
 			);
 			path = Local;
@@ -277,6 +281,8 @@
 		A60013AA /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				98FA89522F7511D900EB26E6 /* CameraPicker.swift */,
+				98FA89532F7511D900EB26E6 /* FolderPickerSheet.swift */,
 				A10013AB /* BreadcrumbView.swift */,
 				A10014AB /* DriveItemRow.swift */,
 			);
@@ -352,6 +358,7 @@
 		A60018AA /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				98FA89502F75109900EB26E6 /* UploadManager.swift */,
 				A60018BA /* Crypto */,
 				A10040AB /* DriveSocketManager.swift */,
 				A10026AB /* FileUtils.swift */,
@@ -400,6 +407,15 @@
 				A10032AB /* MockDriveRepository.swift */,
 			);
 			path = Mocks;
+			sourceTree = "<group>";
+		};
+		A60099AA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A40001AB /* ZillitDrive.app */,
+				A40002AB /* ZillitDriveTests.xctest */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -470,7 +486,7 @@
 				en,
 				Base,
 			);
-			mainGroup = A60001AA /* Root */;
+			mainGroup = A60001AA;
 			packageReferences = (
 				A90003AA /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				A90004AA /* XCRemoteSwiftPackageReference "socket.io-client-swift" */,
@@ -505,11 +521,14 @@
 				A10002AA /* ZillitDriveApp.swift in Sources */,
 				A10003AA /* SessionManager.swift in Sources */,
 				A10004AA /* DriveMapper.swift in Sources */,
+				98FA89572F75120500EB26E6 /* OfflineCache.swift in Sources */,
 				A10005AA /* APIClient.swift in Sources */,
 				A10006AA /* DriveResponses.swift in Sources */,
 				A10007AA /* DriveEndpoints.swift in Sources */,
 				A10008AA /* DriveRepositoryImpl.swift in Sources */,
 				A10009AA /* DriveModels.swift in Sources */,
+				98FA89542F7511D900EB26E6 /* FolderPickerSheet.swift in Sources */,
+				98FA89552F7511D900EB26E6 /* CameraPicker.swift in Sources */,
 				A10010AA /* DriveRepository.swift in Sources */,
 				A10011AA /* LoginView.swift in Sources */,
 				A10012AA /* LoginViewModel.swift in Sources */,
@@ -527,6 +546,7 @@
 				A10024AA /* AESCBCEncryptor.swift in Sources */,
 				A10025AA /* BodyHashGenerator.swift in Sources */,
 				A10026AA /* FileUtils.swift in Sources */,
+				98FA89512F75109900EB26E6 /* UploadManager.swift in Sources */,
 				A10040AA /* DriveSocketManager.swift in Sources */,
 				A10039AA /* OnlyOfficeEditorView.swift in Sources */,
 			);
@@ -799,15 +819,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A80003AA /* Build configuration list for PBXProject "ZillitDrive" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				B10001AA /* Debug */,
-				B10002AA /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		A80001AA /* Build configuration list for PBXNativeTarget "ZillitDrive" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -822,6 +833,15 @@
 			buildConfigurations = (
 				B10005AA /* Debug */,
 				B10006AA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A80003AA /* Build configuration list for PBXProject "ZillitDrive" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B10001AA /* Debug */,
+				B10002AA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

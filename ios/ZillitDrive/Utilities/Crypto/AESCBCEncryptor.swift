@@ -90,6 +90,28 @@ enum AESCBCEncryptor {
         return String(data: buffer, encoding: .utf8) ?? ""
     }
 
+    /// Generate encrypted moduledata for socket auth (mirrors web's encryptHeaders)
+    static func generateModuleData(userId: String, projectId: String, deviceId: String) -> String {
+        guard let session = SessionManager.shared.currentSession else { return "" }
+        var payload: [String: Any] = [
+            "device_id": deviceId,
+            "project_id": projectId,
+            "user_id": userId,
+            "scanner_device_id": session.scannerDeviceId
+        ]
+        if session.environment == "development" || session.environment == "preprod" {
+            payload["time_stamp"] = Int(Date().timeIntervalSince1970 * 1000)
+        }
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: payload, options: [.sortedKeys])
+            let jsonString = String(data: jsonData, encoding: .utf8) ?? "{}"
+            return try encrypt(plaintext: jsonString, key: session.encryptionKey, iv: session.encryptionIv)
+        } catch {
+            print("🔴 [AESCBCEncryptor] generateModuleData failed: \(error)")
+            return ""
+        }
+    }
+
     private static func hexStringToData(_ hex: String) throws -> Data {
         var data = Data()
         var index = hex.startIndex

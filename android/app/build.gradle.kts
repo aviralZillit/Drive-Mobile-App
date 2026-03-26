@@ -28,7 +28,7 @@ android {
         debug {
             isMinifyEnabled = false
             buildConfigField("String", "DRIVE_BASE_URL", "\"${project.findProperty("DRIVE_BASE_URL_DEV") ?: "https://driveapi-dev.zillit.com/api"}\"")
-            buildConfigField("String", "SOCKET_URL", "\"${project.findProperty("SOCKET_URL_DEV") ?: "https://driveapi-dev.zillit.com"}\"")
+            buildConfigField("String", "SOCKET_URL", "\"${project.findProperty("SOCKET_URL_DEV") ?: "https://cncapi-dev.zillit.com"}\"")
             buildConfigField("String", "ENVIRONMENT", "\"development\"")
         }
         release {
@@ -77,6 +77,8 @@ dependencies {
     // Hilt DI
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
+    implementation(libs.hilt.work)
+    kapt(libs.hilt.work.compiler)
 
     // Coroutines
     implementation(libs.coroutines.core)
@@ -108,6 +110,10 @@ dependencies {
 
     // WorkManager (background uploads)
     implementation(libs.workmanager)
+
+    // Firebase Messaging (push notifications)
+    // Note: google-services.json needs manual Firebase Console setup
+    implementation(libs.firebase.messaging)
 
     // DataStore
     implementation(libs.datastore)

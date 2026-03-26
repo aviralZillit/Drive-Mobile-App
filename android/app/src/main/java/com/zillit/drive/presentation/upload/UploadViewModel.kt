@@ -4,6 +4,13 @@ import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.Constraints
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
+import com.zillit.drive.data.worker.UploadWorker
 import com.zillit.drive.domain.model.UploadPart
 import com.zillit.drive.domain.model.UploadSession
 import com.zillit.drive.domain.repository.DriveRepository
@@ -144,6 +151,9 @@ class UploadViewModel @Inject constructor(
         }
     }
 
+    // Threshold for routing to WorkManager background upload (10 MB)
+    private val backgroundUploadThreshold = 10L * 1024L * 1024L
+
     fun startUpload(
         uri: Uri,
         fileName: String,
@@ -151,6 +161,12 @@ class UploadViewModel @Inject constructor(
         mimeType: String,
         folderId: String?
     ) {
+        // For large files (> 10MB), delegate to WorkManager for background upload
+        if (fileSize > backgroundUploadThreshold) {
+            enqueueBackgroundUpload(uri, fileName, fileSize, mimeType, folderId)
+            return
+        }
+
         val tempId = "temp_${System.currentTimeMillis()}"
 
         // Add a pending item immediately for UI feedback
@@ -204,6 +220,53 @@ class UploadViewModel @Inject constructor(
         }
 
         uploadJobs[tempId] = job
+    }
+
+    private fun enqueueBackgroundUpload(
+        uri: Uri,
+        fileName: String,
+        fileSize: Long,
+        mimeType: String,
+        folderId: String?
+    ) {
+        val inputData = workDataOf(
+            UploadWorker.KEY_FILE_URI to uri.toString(),
+            UploadWorker.KEY_FILE_NAME to fileName,
+            UploadWorker.KEY_FILE_SIZE to fileSize,
+            UploadWorker.KEY_MIME_TYPE to mimeType,
+            UploadWorker.KEY_FOLDER_ID to folderId
+        )
+
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val workRequest = OneTimeWorkRequestBuilder<UploadWorker>()
+            .setInputData(inputData)
+            .setConstraints(constraints)
+            .build()
+
+        val workName = "upload_${fileName}_${System.currentTimeMillis()}"
+
+        WorkManager.getInstance(application)
+            .enqueueUniqueWork(workName, ExistingWorkPolicy.KEEP, workRequest)
+
+        // Add to UI state to show it's been enqueued
+        _uiState.update { state ->
+            state.copy(
+                activeUploads = state.activeUploads + UploadItemState(
+                    uploadId = workName,
+                    fileName = fileName,
+                    fileSizeBytes = fileSize,
+                    progress = 0f,
+                    status = UploadStatus.UPLOADING,
+                    uri = uri,
+                    folderId = folderId,
+                    mimeType = mimeType
+                ),
+                error = null
+            )
+        }
     }
 
     private suspend fun uploadChunks(session: UploadSession, uri: Uri) {

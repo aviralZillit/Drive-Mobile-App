@@ -273,6 +273,14 @@ enum DriveEndpoints {
         )
     }
 
+    static func bulkDownloadUrls(fileIds: [String]) async throws -> String {
+        struct BulkDownloadResponse: Decodable { let url: String }
+        let response: APIResponse<BulkDownloadResponse> = try await api.request(
+            endpoint: "bulk/download", method: .post, body: ["file_ids": fileIds]
+        )
+        return response.data?.url ?? ""
+    }
+
     // MARK: - Activity
 
     static func getActivity(options: [String: String] = [:]) async throws -> [DriveActivityDTO] {

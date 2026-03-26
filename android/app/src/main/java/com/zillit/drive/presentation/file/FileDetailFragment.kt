@@ -80,7 +80,9 @@ class FileDetailFragment : Fragment() {
             layoutManager = LinearLayoutManager(requireContext())
         }
 
-        versionsAdapter = VersionsAdapter()
+        versionsAdapter = VersionsAdapter { versionId ->
+            showRestoreVersionDialog(versionId)
+        }
         binding.rvVersions.apply {
             adapter = versionsAdapter
             layoutManager = LinearLayoutManager(requireContext())
@@ -358,6 +360,17 @@ class FileDetailFragment : Fragment() {
             .show()
     }
 
+    private fun showRestoreVersionDialog(versionId: String) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Restore Version")
+            .setMessage("Are you sure you want to restore this version? The current version will be replaced.")
+            .setPositiveButton("Restore") { _, _ ->
+                viewModel.restoreVersion(versionId)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
     private fun showDeleteCommentDialog(commentId: String) {
         AlertDialog.Builder(requireContext())
             .setTitle("Delete Comment")
@@ -480,7 +493,9 @@ class FileDetailFragment : Fragment() {
 
     // ---- Inner Adapter: Versions ----
 
-    private class VersionsAdapter : RecyclerView.Adapter<VersionsAdapter.VersionViewHolder>() {
+    private class VersionsAdapter(
+        private val onRestoreClick: (String) -> Unit
+    ) : RecyclerView.Adapter<VersionsAdapter.VersionViewHolder>() {
 
         private var items: List<DriveVersion> = emptyList()
 
@@ -525,12 +540,32 @@ class FileDetailFragment : Fragment() {
                 textSize = 12f
                 setTextColor(Color.parseColor("#8F9BB3"))
                 textAlignment = View.TEXT_ALIGNMENT_VIEW_END
+                layoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    marginEnd = 8
+                }
+            }
+
+            val btnRestore = TextView(parent.context).apply {
+                text = "Restore"
+                textSize = 12f
+                setTextColor(Color.parseColor("#1353D1"))
+                setPadding(16, 8, 16, 8)
+                val restoreBg = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = 6f
+                    setStroke(1, Color.parseColor("#1353D1"))
+                }
+                background = restoreBg
             }
 
             layout.addView(tvVersion)
             layout.addView(tvInfo)
+            layout.addView(btnRestore)
 
-            return VersionViewHolder(layout, tvVersion, tvInfo)
+            return VersionViewHolder(layout, tvVersion, tvInfo, btnRestore)
         }
 
         override fun onBindViewHolder(holder: VersionViewHolder, position: Int) {
@@ -539,6 +574,16 @@ class FileDetailFragment : Fragment() {
             val size = FileUtils.formatFileSize(version.fileSizeBytes)
             val date = formatTimestamp(version.createdOn)
             holder.tvInfo.text = "$size  -  $date"
+
+            // Hide restore on the latest version (first item)
+            if (position == 0 && items.size > 1) {
+                holder.btnRestore.visibility = View.GONE
+            } else if (items.size <= 1) {
+                holder.btnRestore.visibility = View.GONE
+            } else {
+                holder.btnRestore.visibility = View.VISIBLE
+                holder.btnRestore.setOnClickListener { onRestoreClick(version.id) }
+            }
         }
 
         private fun formatTimestamp(timestamp: Long): String {
@@ -550,7 +595,8 @@ class FileDetailFragment : Fragment() {
         class VersionViewHolder(
             itemView: View,
             val tvVersion: TextView,
-            val tvInfo: TextView
+            val tvInfo: TextView,
+            val btnRestore: TextView
         ) : RecyclerView.ViewHolder(itemView)
     }
 }
