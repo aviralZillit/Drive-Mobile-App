@@ -478,8 +478,11 @@ final class HomeViewModel: ObservableObject {
         ]
         for event in refreshEvents {
             socketManager.on(event) { [weak self] data in
-                print("🔌 [DriveSocket] Received event: \(event) — refreshing")
-                Task { @MainActor in await self?.forceLoadContents() }
+                print("🔌 [DriveSocket] Received event: \(event) — invalidating cache + refreshing")
+                Task { @MainActor in
+                    self?.repository.invalidateAll()
+                    await self?.forceLoadContents()
+                }
             }
         }
 
@@ -491,6 +494,7 @@ final class HomeViewModel: ObservableObject {
                           let sharedWith = dict["shared_with"] as? [String],
                           let userId = SessionManager.shared.currentSession?.userId,
                           sharedWith.contains(userId) else { return }
+                    self?.repository.invalidateAll()
                     await self?.forceLoadContents()
                 }
             }
