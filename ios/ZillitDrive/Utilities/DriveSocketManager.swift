@@ -55,8 +55,6 @@ final class DriveSocketManager: ObservableObject {
             .reconnectWait(2),
             .reconnectWaitMax(30),
             .version(.three),
-            .extraHeaders(["moduledata": moduledata]),
-            .connectParams(["moduledata": moduledata]),
         ])
         socket = manager?.defaultSocket
 
@@ -65,7 +63,6 @@ final class DriveSocketManager: ObservableObject {
                 self?.isConnected = true
             }
             print("🔌 [DriveSocket] Connected — emitting user:join + joining room \(projectId)_room")
-            // Web emits user:join first, then join_room
             self?.socket?.emit("user:join", [:])
             self?.socket?.emit("join_room", ["room": "\(projectId)_room"])
         }
@@ -94,7 +91,9 @@ final class DriveSocketManager: ObservableObject {
             socket?.on(listener.event) { data, _ in listener.callback(data) }
         }
 
-        socket?.connect()
+        // connect(withPayload:) sends auth data in the Socket.IO CONNECT packet
+        // CNC middleware reads socket.handshake.auth.moduledata (chat-socket-auth.js:19)
+        socket?.connect(withPayload: ["moduledata": moduledata])
     }
 
     func disconnect() {
