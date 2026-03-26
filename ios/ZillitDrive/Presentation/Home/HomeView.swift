@@ -348,6 +348,14 @@ struct HomeView: View {
                 )
             }
         }
+        .alert("Error", isPresented: Binding(
+            get: { viewModel.errorMessage != nil && !viewModel.items.isEmpty },
+            set: { if !$0 { viewModel.errorMessage = nil } }
+        )) {
+            Button("OK") { viewModel.errorMessage = nil }
+        } message: {
+            Text(viewModel.errorMessage ?? "")
+        }
     }
 
     // MARK: - List Content
