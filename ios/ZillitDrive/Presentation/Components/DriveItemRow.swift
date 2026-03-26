@@ -92,10 +92,8 @@ struct DriveItemRow: View {
 
                     Divider()
 
-                    if item.userPermissions?.canDelete ?? (currentUserId != nil && item.createdBy == currentUserId) {
-                        Button(role: .destructive) { onDelete() } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
+                    Button(role: .destructive) { onDelete() } label: {
+                        Label("Delete", systemImage: "trash")
                     }
                 } label: {
                     Image(systemName: "ellipsis")
