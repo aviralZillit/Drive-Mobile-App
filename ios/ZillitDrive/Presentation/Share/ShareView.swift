@@ -116,14 +116,14 @@ struct FileShareView: View {
                         }
                     }
 
-                    // Search Results
-                    if !searchText.isEmpty {
-                        if searchResults.isEmpty && !isLoadingUsers {
-                            Text("No matching users found")
+                    // User List (all available users, filtered by search)
+                    if !isLoadingUsers {
+                        if searchResults.isEmpty {
+                            Text(searchText.isEmpty ? "No team members available" : "No matching users found")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
-                        } else {
-                            ForEach(searchResults) { user in
+                        }
+                        ForEach(searchResults) { user in
                                 HStack(spacing: 12) {
                                     UserAvatarView(user: user, size: 36)
 
@@ -147,7 +147,6 @@ struct FileShareView: View {
                                     .buttonStyle(.borderless)
                                 }
                                 .padding(.vertical, 2)
-                            }
                         }
                     }
                 }
@@ -543,14 +542,14 @@ struct FolderShareView: View {
                         }
                     }
 
-                    // Search Results
-                    if !searchText.isEmpty {
-                        if searchResults.isEmpty && !isLoadingUsers {
-                            Text("No matching users found")
+                    // User List (all available users, filtered by search)
+                    if !isLoadingUsers {
+                        if searchResults.isEmpty {
+                            Text(searchText.isEmpty ? "No team members available" : "No matching users found")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
-                        } else {
-                            ForEach(searchResults) { user in
+                        }
+                        ForEach(searchResults) { user in
                                 HStack(spacing: 12) {
                                     UserAvatarView(user: user, size: 36)
 
@@ -574,7 +573,6 @@ struct FolderShareView: View {
                                     .buttonStyle(.borderless)
                                 }
                                 .padding(.vertical, 2)
-                            }
                         }
                     }
                 }

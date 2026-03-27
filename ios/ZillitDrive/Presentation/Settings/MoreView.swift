@@ -5,33 +5,40 @@ struct MoreView: View {
     @State private var storageUsage: StorageUsage?
     @State private var teamMembers: [FolderAccessDTO] = []
     @State private var isLoading = false
+    @State private var userProfile: ProjectUser?
     private let repository: DriveRepository = DriveRepositoryImpl()
 
     var body: some View {
         List {
             // User Profile Section
             Section {
-                if let session = sessionManager.currentSession {
+                if let profile = userProfile {
                     HStack(spacing: 16) {
-                        // Avatar
-                        ZStack {
-                            Circle()
-                                .fill(Color.orange)
-                                .frame(width: 56, height: 56)
-                            Text(String(session.userName.prefix(1)).uppercased())
-                                .font(.title2.bold())
-                                .foregroundColor(.white)
-                        }
-
+                        UserAvatarView(user: profile, size: 56)
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(session.userName.isEmpty ? "User" : session.userName)
+                            Text(profile.fullName)
                                 .font(.title3.bold())
-                            Text(session.userEmail.isEmpty ? session.userId : session.userEmail)
+                            Text(profile.email)
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
-                            Text("Project: \(session.projectId)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                            if let designation = profile.designationName, !designation.isEmpty {
+                                Text(designation)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    .padding(.vertical, 8)
+                } else if let session = sessionManager.currentSession {
+                    HStack(spacing: 16) {
+                        ZStack {
+                            Circle().fill(Color.orange).frame(width: 56, height: 56)
+                            Text(String(session.userId.prefix(1)).uppercased())
+                                .font(.title2.bold()).foregroundColor(.white)
+                        }
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Loading...").font(.title3.bold())
+                            Text(session.userId).font(.caption).foregroundColor(.secondary)
                         }
                     }
                     .padding(.vertical, 8)
@@ -191,8 +198,8 @@ struct MoreView: View {
         }
         .navigationTitle("More")
         .task {
+            await loadUserProfile()
             await loadStorage()
-            await loadTeamMembers()
         }
     }
 
@@ -211,10 +218,14 @@ struct MoreView: View {
         isLoading = false
     }
 
-    private func loadTeamMembers() async {
-        // Team members feature requires a valid folder ID
-        // Skip if no folders are available — this avoids the "root" ObjectId error
-        teamMembers = []
+    private func loadUserProfile() async {
+        guard let userId = sessionManager.currentSession?.userId else { return }
+        do {
+            let allUsers = try await repository.getProjectUsers()
+            userProfile = allUsers.first(where: { $0.id == userId })
+        } catch {
+            print("Failed to load user profile: \(error)")
+        }
     }
 }
 
