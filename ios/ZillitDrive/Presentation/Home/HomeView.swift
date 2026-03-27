@@ -34,12 +34,13 @@ struct HomeView: View {
                 viewModel.switchSection(newVal)
             }
 
-            // Storage quota (root level only)
+            // Storage used (root level only)
             if let storage = viewModel.storageUsage, viewModel.currentFolderId == nil {
-                VStack(spacing: 4) {
-                    ProgressView(value: Double(storage.usedBytes), total: max(Double(storage.totalBytes), 1))
-                        .tint(.orange)
-                    Text("\(FileUtils.formatFileSize(storage.usedBytes)) of \(FileUtils.formatFileSize(storage.totalBytes)) used")
+                HStack(spacing: 6) {
+                    Image(systemName: "externaldrive.fill")
+                        .font(.caption2)
+                        .foregroundColor(.orange)
+                    Text("\(FileUtils.formatFileSize(storage.usedBytes)) used")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
