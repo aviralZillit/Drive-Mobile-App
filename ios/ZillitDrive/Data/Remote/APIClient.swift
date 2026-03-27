@@ -7,6 +7,7 @@ final class APIClient {
 
     private let session: URLSession
     private let baseURL: String
+    private let pathPrefix: String
     private let sessionManager = SessionManager.shared
 
     private init() {
@@ -15,15 +16,17 @@ final class APIClient {
         config.timeoutIntervalForResource = 120
         self.session = URLSession(configuration: config)
         self.baseURL = AppConfig.driveBaseURL
+        self.pathPrefix = "/v2/drive/"
     }
 
-    /// Init with custom base URL (for calling PM, CNC, etc.)
-    init(baseURL: String) {
+    /// Init with custom base URL and path prefix (for calling PM, CNC, etc.)
+    init(baseURL: String, pathPrefix: String = "/v2/") {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 60
         config.timeoutIntervalForResource = 120
         self.session = URLSession(configuration: config)
         self.baseURL = baseURL
+        self.pathPrefix = pathPrefix
     }
 
     // MARK: - Public API
@@ -158,7 +161,7 @@ final class APIClient {
     // MARK: - URL Building
 
     private func buildURL(endpoint: String, queryParams: [String: String]?) throws -> URL {
-        var urlString = "\(baseURL)/v2/drive/\(endpoint)"
+        var urlString = "\(baseURL)\(pathPrefix)\(endpoint)"
         if let params = queryParams, !params.isEmpty {
             let queryString = params
                 .filter { !$0.value.isEmpty }
