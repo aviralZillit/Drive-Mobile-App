@@ -239,32 +239,137 @@ struct PresignedUrlDTO: Codable {
 
 // MARK: - Access DTOs
 
-struct FolderAccessDTO: Codable {
+struct FolderAccessDTO: Codable, Identifiable {
+    var id: String { userId }
     let userId: String
+    let userName: String?
     let folderId: String?
     let role: String
     let inherited: Bool?
 
     enum CodingKeys: String, CodingKey {
-        case userId = "user_id"
+        case userIdObj = "user_id"
         case folderId = "folder_id"
         case role, inherited
     }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        folderId = try container.decodeIfPresent(String.self, forKey: .folderId)
+        role = (try? container.decode(String.self, forKey: .role)) ?? "viewer"
+        inherited = try container.decodeIfPresent(Bool.self, forKey: .inherited)
+
+        if let userObj = try? container.decode(UserIdObject.self, forKey: .userIdObj) {
+            userId = userObj.id
+            userName = userObj.fullName
+        } else if let userIdStr = try? container.decode(String.self, forKey: .userIdObj) {
+            userId = userIdStr
+            userName = nil
+        } else {
+            userId = ""
+            userName = nil
+        }
+    }
+
+    init(userId: String, folderId: String?, role: String, inherited: Bool?) {
+        self.userId = userId
+        self.userName = nil
+        self.folderId = folderId
+        self.role = role
+        self.inherited = inherited
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(userId, forKey: .userIdObj)
+        try container.encodeIfPresent(folderId, forKey: .folderId)
+        try container.encode(role, forKey: .role)
+        try container.encodeIfPresent(inherited, forKey: .inherited)
+    }
 }
 
-struct FileAccessDTO: Codable {
+struct FileAccessDTO: Codable, Identifiable {
+    var id: String { userId }
     let userId: String
+    let userName: String?
+    let userEmail: String?
     let fileId: String?
     let canView: Bool?
     let canEdit: Bool?
     let canDownload: Bool?
+    let canDelete: Bool?
 
     enum CodingKeys: String, CodingKey {
-        case userId = "user_id"
+        case userIdObj = "user_id"
         case fileId = "file_id"
         case canView = "can_view"
         case canEdit = "can_edit"
         case canDownload = "can_download"
+        case canDelete = "can_delete"
+    }
+
+    // user_id comes as object {"_id": "...", "full_name": "..."} from GET,
+    // but as string from local creation
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        fileId = try container.decodeIfPresent(String.self, forKey: .fileId)
+        canView = try container.decodeIfPresent(Bool.self, forKey: .canView)
+        canEdit = try container.decodeIfPresent(Bool.self, forKey: .canEdit)
+        canDownload = try container.decodeIfPresent(Bool.self, forKey: .canDownload)
+        canDelete = try container.decodeIfPresent(Bool.self, forKey: .canDelete)
+
+        // Try decoding user_id as object first, then as string
+        if let userObj = try? container.decode(UserIdObject.self, forKey: .userIdObj) {
+            userId = userObj.id
+            userName = userObj.fullName
+            userEmail = userObj.email
+        } else if let userIdStr = try? container.decode(String.self, forKey: .userIdObj) {
+            userId = userIdStr
+            userName = nil
+            userEmail = nil
+        } else {
+            userId = ""
+            userName = nil
+            userEmail = nil
+        }
+    }
+
+    // For creating new entries locally
+    init(userId: String, fileId: String?, canView: Bool?, canEdit: Bool?, canDownload: Bool?) {
+        self.userId = userId
+        self.userName = nil
+        self.userEmail = nil
+        self.fileId = fileId
+        self.canView = canView
+        self.canEdit = canEdit
+        self.canDownload = canDownload
+        self.canDelete = nil
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(userId, forKey: .userIdObj)
+        try container.encodeIfPresent(fileId, forKey: .fileId)
+        try container.encodeIfPresent(canView, forKey: .canView)
+        try container.encodeIfPresent(canEdit, forKey: .canEdit)
+        try container.encodeIfPresent(canDownload, forKey: .canDownload)
+        try container.encodeIfPresent(canDelete, forKey: .canDelete)
+    }
+}
+
+struct UserIdObject: Decodable {
+    let id: String
+    let fullName: String?
+    let firstName: String?
+    let lastName: String?
+    let email: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id = "_id"
+        case fullName = "full_name"
+        case firstName = "first_name"
+        case lastName = "last_name"
+        case email
     }
 }
 

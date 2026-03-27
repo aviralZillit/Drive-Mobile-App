@@ -458,10 +458,10 @@ struct FileShareView: View {
             }
             try await repository.updateFileAccess(fileId: fileId, entries: entries)
             saveSuccess = true
-            // Auto-dismiss success message after 2 seconds
+            // Dismiss after brief success feedback
             Task {
-                try? await Task.sleep(nanoseconds: 2_000_000_000)
-                saveSuccess = false
+                try? await Task.sleep(nanoseconds: 500_000_000)
+                dismiss()
             }
         } catch {
             errorMessage = "Failed to save: \(error.localizedDescription)"
