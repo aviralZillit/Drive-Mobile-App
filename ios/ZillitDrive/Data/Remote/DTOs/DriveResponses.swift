@@ -379,26 +379,34 @@ struct ShareLinkDTO: Codable {
     }
 }
 
-// MARK: - Project User DTO
+// MARK: - Project User DTO (from PM API: /v2/project/users)
 
 struct ProjectUserDTO: Decodable {
-    let id: String?
+    let id: String?           // PM returns "user_id" not "_id"
+    let odId: String?         // Also has "_id" (ProjectUser doc ID)
     let fullName: String?
     let firstName: String?
     let lastName: String?
     let email: String?
-    let profileImage: String?
+    let profilePicture: ProfilePictureDTO?
     let designationName: String?
 
     enum CodingKeys: String, CodingKey {
-        case id = "_id"
+        case id = "user_id"
+        case odId = "_id"
         case fullName = "full_name"
         case firstName = "first_name"
         case lastName = "last_name"
         case email
-        case profileImage = "profile_image"
+        case profilePicture = "profile_picture"
         case designationName = "designation_name"
     }
+}
+
+struct ProfilePictureDTO: Decodable {
+    let media: String?
+    let region: String?
+    let bucket: String?
 }
 
 // MARK: - Favorite IDs

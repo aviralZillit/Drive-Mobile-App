@@ -331,11 +331,13 @@ enum DriveEndpoints {
         )
     }
 
-    // MARK: - Project Users
+    // MARK: - Project Users (calls Project Management API, not Drive API)
 
     static func getProjectUsers() async throws -> [ProjectUserDTO] {
-        let response: APIResponse<[ProjectUserDTO]> = try await api.request(
-            endpoint: "project-users"
+        // Call PM API: GET /v2/project/users — same as web's getAllUserApi()
+        let pmAPI = APIClient(baseURL: AppConfig.projectBaseURL)
+        let response: APIResponse<[ProjectUserDTO]> = try await pmAPI.request(
+            endpoint: "project/users"
         )
         return response.data ?? []
     }

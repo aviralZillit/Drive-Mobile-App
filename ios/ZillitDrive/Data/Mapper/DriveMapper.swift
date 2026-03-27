@@ -182,13 +182,20 @@ enum DriveMapper {
         let firstName = dto.firstName ?? ""
         let lastName = dto.lastName ?? ""
         let fullName = dto.fullName ?? "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
+        // PM API returns profile_picture: { media, region, bucket } — construct S3 URL
+        let profileImage: String? = {
+            guard let pp = dto.profilePicture, let media = pp.media, !media.isEmpty else { return nil }
+            let bucket = pp.bucket ?? "zillit-bucket-mumbai-dev"
+            let region = pp.region ?? "ap-south-1"
+            return "https://\(bucket).s3.\(region).amazonaws.com/\(media)"
+        }()
         return ProjectUser(
-            id: dto.id ?? "",
+            id: dto.id ?? dto.odId ?? "",
             fullName: fullName.isEmpty ? (dto.email ?? "Unknown") : fullName,
             firstName: firstName,
             lastName: lastName,
             email: dto.email ?? "",
-            profileImage: dto.profileImage,
+            profileImage: profileImage,
             designationName: dto.designationName
         )
     }
