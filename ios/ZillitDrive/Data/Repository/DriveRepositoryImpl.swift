@@ -368,4 +368,11 @@ final class DriveRepositoryImpl: DriveRepository {
     func getEditorPageToken(fileId: String) async throws -> String {
         try await DriveEndpoints.getEditorPageToken(fileId: fileId)
     }
+
+    // MARK: - Project Users
+
+    func getProjectUsers() async throws -> [ProjectUser] {
+        let dtos = try await DriveEndpoints.getProjectUsers()
+        return dtos.map { DriveMapper.toDomain($0) }
+    }
 }

@@ -331,6 +331,15 @@ enum DriveEndpoints {
         )
     }
 
+    // MARK: - Project Users
+
+    static func getProjectUsers() async throws -> [ProjectUserDTO] {
+        let response: APIResponse<[ProjectUserDTO]> = try await api.request(
+            endpoint: "project-users"
+        )
+        return response.data ?? []
+    }
+
     // MARK: - Editor
 
     /// Get editor config — same as web: GET /editor/{fileId}/config?mode=view|edit

@@ -298,13 +298,11 @@ struct HomeView: View {
             }
         }
         .sheet(item: $shareItem_) { item in
-            NavigationStack {
-                switch item {
-                case .file(let file):
-                    FileShareView(fileId: file.id)
-                case .folder(let folder):
-                    FolderShareView(folderId: folder.id)
-                }
+            switch item {
+            case .file(let file):
+                FileShareView(fileId: file.id, fileName: file.fileName)
+            case .folder(let folder):
+                FolderShareView(folderId: folder.id, folderName: folder.folderName)
             }
         }
         .alert("Rename", isPresented: Binding(

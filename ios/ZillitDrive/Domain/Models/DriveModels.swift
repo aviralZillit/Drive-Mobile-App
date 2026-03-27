@@ -160,3 +160,21 @@ struct BreadcrumbItem: Identifiable, Equatable {
     let id: String?  // nil for root
     let name: String
 }
+
+struct ProjectUser: Identifiable, Equatable {
+    let id: String
+    let fullName: String
+    let firstName: String
+    let lastName: String
+    let email: String
+    let profileImage: String?
+    let designationName: String?
+
+    /// First letter of the name for avatar fallback
+    var initials: String {
+        let first = firstName.first.map(String.init) ?? ""
+        let last = lastName.first.map(String.init) ?? ""
+        let result = "\(first)\(last)"
+        return result.isEmpty ? String(fullName.prefix(1)).uppercased() : result.uppercased()
+    }
+}

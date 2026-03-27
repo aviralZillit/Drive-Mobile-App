@@ -176,6 +176,23 @@ enum DriveMapper {
         ShareLink(url: dto.url, expiresAt: dto.expiresAt)
     }
 
+    // MARK: - Project User
+
+    static func toDomain(_ dto: ProjectUserDTO) -> ProjectUser {
+        let firstName = dto.firstName ?? ""
+        let lastName = dto.lastName ?? ""
+        let fullName = dto.fullName ?? "\(firstName) \(lastName)".trimmingCharacters(in: .whitespaces)
+        return ProjectUser(
+            id: dto.id ?? "",
+            fullName: fullName.isEmpty ? (dto.email ?? "Unknown") : fullName,
+            firstName: firstName,
+            lastName: lastName,
+            email: dto.email ?? "",
+            profileImage: dto.profileImage,
+            designationName: dto.designationName
+        )
+    }
+
     // MARK: - Trash
 
     static func toDomain(_ dto: TrashItemDTO) -> DriveItem {

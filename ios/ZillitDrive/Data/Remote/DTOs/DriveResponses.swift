@@ -379,6 +379,28 @@ struct ShareLinkDTO: Codable {
     }
 }
 
+// MARK: - Project User DTO
+
+struct ProjectUserDTO: Decodable {
+    let id: String?
+    let fullName: String?
+    let firstName: String?
+    let lastName: String?
+    let email: String?
+    let profileImage: String?
+    let designationName: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id = "_id"
+        case fullName = "full_name"
+        case firstName = "first_name"
+        case lastName = "last_name"
+        case email
+        case profileImage = "profile_image"
+        case designationName = "designation_name"
+    }
+}
+
 // MARK: - Favorite IDs
 
 struct FavoriteIdsDTO: Codable {

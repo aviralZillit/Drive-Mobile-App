@@ -73,4 +73,7 @@ protocol DriveRepository {
 
     // Editor
     func getEditorPageToken(fileId: String) async throws -> String
+
+    // Project Users
+    func getProjectUsers() async throws -> [ProjectUser]
 }

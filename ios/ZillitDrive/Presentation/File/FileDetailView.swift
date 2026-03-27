@@ -13,6 +13,8 @@ struct FileDetailView: View {
     @State private var isDownloading = false
     @State private var downloadError: String?
     @State private var showShareSheet = false
+    @State private var showShareManagement = false
+    @State private var accessCount: Int = 0
     @State private var shareURL: URL?
     @State private var previewURL: URL?
     @State private var selectedTab = 0
@@ -112,6 +114,33 @@ struct FileDetailView: View {
                         .foregroundColor(.red)
                         .padding(.horizontal)
                 }
+
+                // Manage Access button
+                Button {
+                    showShareManagement = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "person.2.fill")
+                            .font(.subheadline)
+                        if accessCount > 0 {
+                            Text("Shared with \(accessCount) \(accessCount == 1 ? "person" : "people")")
+                                .font(.subheadline)
+                        } else {
+                            Text("Manage Access")
+                                .font(.subheadline)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(10)
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal)
             }
             .padding(.horizontal)
             .padding(.bottom, 8)
@@ -144,6 +173,12 @@ struct FileDetailView: View {
             if let url = shareURL {
                 ShareSheet(items: [url])
             }
+        }
+        .sheet(isPresented: $showShareManagement) {
+            FileShareView(fileId: file.id, fileName: file.fileName)
+                .onDisappear {
+                    Task { await loadAccessCount() }
+                }
         }
         .quickLookPreview($previewURL)
         .fullScreenCover(isPresented: $showEditor) {
@@ -287,6 +322,13 @@ struct FileDetailView: View {
         versions = (try? await v) ?? []
         tags = (try? await t) ?? []
         isLoading = false
+
+        await loadAccessCount()
+    }
+
+    private func loadAccessCount() async {
+        let entries = (try? await repository.getFileAccess(fileId: file.id)) ?? []
+        accessCount = entries.count
     }
 
     private func addComment() async {
