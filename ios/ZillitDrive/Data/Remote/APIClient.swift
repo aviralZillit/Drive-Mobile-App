@@ -17,6 +17,15 @@ final class APIClient {
         self.baseURL = AppConfig.driveBaseURL
     }
 
+    /// Init with custom base URL (for calling PM, CNC, etc.)
+    init(baseURL: String) {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 60
+        config.timeoutIntervalForResource = 120
+        self.session = URLSession(configuration: config)
+        self.baseURL = baseURL
+    }
+
     // MARK: - Public API
 
     func request<T: Decodable>(
