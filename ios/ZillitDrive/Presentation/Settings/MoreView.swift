@@ -14,7 +14,20 @@ struct MoreView: View {
             Section {
                 if let profile = userProfile {
                     HStack(spacing: 16) {
-                        UserAvatarView(user: profile, size: 56)
+                        // Avatar
+                        ZStack {
+                            Circle().fill(Color.orange).frame(width: 56, height: 56)
+                            if let img = profile.profileImage, let url = URL(string: img) {
+                                AsyncImage(url: url) { image in
+                                    image.resizable().scaledToFill()
+                                } placeholder: {
+                                    Text(profile.initials).font(.title2.bold()).foregroundColor(.white)
+                                }
+                                .frame(width: 56, height: 56).clipShape(Circle())
+                            } else {
+                                Text(profile.initials).font(.title2.bold()).foregroundColor(.white)
+                            }
+                        }
                         VStack(alignment: .leading, spacing: 4) {
                             Text(profile.fullName)
                                 .font(.title3.bold())
