@@ -67,6 +67,8 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState
     private var loadJob: Job? = null
     private var loadId: Long = 0
+    /** Maps folderId → parent_folder_id for ancestor badge bubbling */
+    private var parentMap: Map<String, String> = emptyMap()
 
     init {
         loadContents()
@@ -116,6 +118,11 @@ class HomeViewModel @Inject constructor(
 
                 val files = filesResult.getOrDefault(emptyList())
                 val folders = foldersResult.getOrDefault(emptyList())
+
+                // Build parent map for ancestor badge bubbling
+                parentMap = folders
+                    .filter { !it.parentFolderId.isNullOrEmpty() }
+                    .associate { it.id to it.parentFolderId!! }
 
                 // Client-side filtering (matches web combinedData useMemo)
                 val filteredFiles = if (folderId != null) {
@@ -642,6 +649,12 @@ class HomeViewModel @Inject constructor(
             val newFileBadges = state.fileBadges.toMutableSet()
             if (level1 != null) {
                 newFolderBadges[level1] = (newFolderBadges[level1] ?: 0) + 1
+                // Bubble up to ancestor folders
+                var pid = parentMap[level1]
+                while (pid != null) {
+                    newFolderBadges[pid] = (newFolderBadges[pid] ?: 0) + 1
+                    pid = parentMap[pid]
+                }
             }
             if (level2 != null) {
                 newFileBadges.add(level2)
@@ -651,8 +664,21 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun markFolderRead(folderId: String) {
+        val clearedCount = _uiState.value.folderBadges[folderId] ?: 0
         _uiState.update { state ->
-            state.copy(folderBadges = state.folderBadges - folderId)
+            val newBadges = state.folderBadges.toMutableMap()
+            newBadges.remove(folderId)
+            // Decrement ancestor badge counts
+            if (clearedCount > 0) {
+                var pid = parentMap[folderId]
+                while (pid != null) {
+                    val current = newBadges[pid] ?: 0
+                    val newCount = current - clearedCount
+                    if (newCount <= 0) newBadges.remove(pid) else newBadges[pid] = newCount
+                    pid = parentMap[pid]
+                }
+            }
+            state.copy(folderBadges = newBadges)
         }
         // Emit socket to sync with backend (matches web connectSocket.js)
         val session = sessionManager.getCachedSession() ?: return

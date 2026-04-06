@@ -22,6 +22,10 @@ final class HomeViewModel: ObservableObject {
 
     private let repository: DriveRepository
     private let socketManager = DriveSocketManager()
+    /// All folders from last API response (before client-side filtering) — used for ancestor badge bubbling
+    private var allFolders: [DriveFolder] = []
+    /// Maps folderId → parent_folder_id for walking up the ancestor chain
+    private var parentMap: [String: String] = [:]
     private var loadTask: Task<Void, Never>?
     private var loadId: UInt64 = 0
 
@@ -108,6 +112,16 @@ final class HomeViewModel: ObservableObject {
             }
             if let storage = await storageTask { storageUsage = storage }
             if let tags = await tagsTask { allTags = tags }
+
+            // Store all folders for ancestor badge bubbling
+            allFolders = contentsResult.folders
+            var map: [String: String] = [:]
+            for folder in allFolders {
+                if let pid = folder.parentFolderId, !pid.isEmpty {
+                    map[folder.id] = pid
+                }
+            }
+            parentMap = map
 
             // Client-side filtering (matches web's combinedData useMemo)
             let filteredFolders: [DriveFolder]
@@ -527,6 +541,12 @@ final class HomeViewModel: ObservableObject {
     func handleNewBadge(level1: String?, level2: String?) {
         if let folderId = level1 {
             folderBadges[folderId, default: 0] += 1
+            // Bubble up to ancestor folders
+            var pid = parentMap[folderId]
+            while let ancestorId = pid {
+                folderBadges[ancestorId, default: 0] += 1
+                pid = parentMap[ancestorId]
+            }
         }
         if let fileId = level2 {
             fileBadges.insert(fileId)
@@ -534,7 +554,22 @@ final class HomeViewModel: ObservableObject {
     }
 
     func markFolderRead(_ folderId: String) {
-        folderBadges.removeValue(forKey: folderId)
+        let clearedCount = folderBadges.removeValue(forKey: folderId) ?? 0
+        // Decrement ancestor badge counts by the cleared amount
+        if clearedCount > 0 {
+            var pid = parentMap[folderId]
+            while let ancestorId = pid {
+                if let current = folderBadges[ancestorId] {
+                    let newCount = current - clearedCount
+                    if newCount <= 0 {
+                        folderBadges.removeValue(forKey: ancestorId)
+                    } else {
+                        folderBadges[ancestorId] = newCount
+                    }
+                }
+                pid = parentMap[ancestorId]
+            }
+        }
         // Remove file badges for files in this folder
         let folderFiles = items.compactMap { item -> String? in
             if case .file(let f) = item, f.folderId == folderId { return f.id }
